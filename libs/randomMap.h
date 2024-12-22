@@ -1,3 +1,13 @@
+#ifndef RANDO_MAP
+#define RANDO_MAP
+
+#define LARGURA_TOTAL 240
+#define ALTURA_TOTAL 12
+#define LARGURA_TRECHO 30
+#define TRECHOS 8
+
+/*
+
 BIBLIOTECA RANDOM_MAP
 
 CONSTANTES DA BLIBLIOTECA:
@@ -22,3 +32,12 @@ Parâmetros:
 FUNÇÃO: imprimeMap(char trecho[TRECHOS][ALTURA_TOTAL][LARGURA_TRECHO])
 1) Basicamente imprime as matrizes contida no array tridimensional no terminal, fiz essa pra verificar o funcionamento da divideMapa.
 		 
+
+
+*/
+
+
+int divideMapa(int n, char mapa[TRECHOS][ALTURA_TOTAL][LARGURA_TRECHO]);
+void imprimeMap(char mapa[TRECHOS][ALTURA_TOTAL][LARGURA_TRECHO]);
+
+#endif // RANDO_MAP
