@@ -171,13 +171,13 @@ void movePlayer(Player *player) {
     player->position.y += player->velocityY;
 
     // Restrinja o jogador dentro dos limites da tela
-    if (player->position.y < 0) {
-        player->position.y = 0;
+    if (player->position.y < CELL_SIZE) {
+        player->position.y = CELL_SIZE;
         player->velocityY = 0; // Evita "grudar" no topo
     }
 
-    if (player->position.y > (MAP_HEIGHT * CELL_SIZE) - player->texture.height) {
-        player->position.y = (MAP_HEIGHT * CELL_SIZE) - player->texture.height;
+    if (player->position.y > (MAP_HEIGHT - 2) * CELL_SIZE) {
+        player->position.y = (MAP_HEIGHT - 2) * CELL_SIZE;
         player->velocityY = 0; // Evita ultrapassar o chão
     }
 }

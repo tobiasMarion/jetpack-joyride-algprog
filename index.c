@@ -114,7 +114,6 @@ int main() {
 
     // De-Initialization
     // TODO: Unload all loaded data (textures, fonts, audio) here!
-    
     UnloadTexture(wallTexture);
     UnloadTexture(coinTexture);
     UnloadTexture(playerTexture);
