@@ -172,8 +172,8 @@ void movePlayer(Player *player) {
         player->velocityY = 0; // Evita "grudar" no topo
     }
 
-    if (player->position.y > SCREEN_HEIGHT - player->texture.height) {
-        player->position.y = SCREEN_HEIGHT - player->texture.height;
+    if (player->position.y > (MAP_HEIGHT * CELL_SIZE) - player->texture.height) {
+        player->position.y = (MAP_HEIGHT * CELL_SIZE) - player->texture.height;
         player->velocityY = 0; // Evita ultrapassar o chão
     }
 }
