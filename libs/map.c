@@ -9,7 +9,10 @@
 #define MAP_WIDTH 240
 #define SECTION_WIDTH 30
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
-#define CELL_SIZE 48
+#define CELL_SIZE 64
+
+// This value is used to draw the map more fluidly
+float offsetX = 0;
 
 typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
 
@@ -76,7 +79,7 @@ void loadMapInto(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
     }
 }
 
-void moveMap(MapSection loadedSections[2]) {
+void moveMapMatrix(MapSection loadedSections[2]) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH - 1; j++) {
             loadedSections[0][i][j] = loadedSections[0][i][j + 1];
@@ -92,32 +95,49 @@ void moveMap(MapSection loadedSections[2]) {
     }
 }
 
-void drawMap(MapSection map) {
-    int x, y;
+void moveMap(float speed, MapSection loadedSections[2]) {
+    offsetX += speed;
+
+    if (offsetX > 1) {
+        moveMapMatrix(loadedSections);
+        offsetX--;
+    }
+}
+
+void drawCell(char c, int coordX, int coordY) {
+    int x = (coordX * CELL_SIZE) - (offsetX * CELL_SIZE);
+    int y = coordY * CELL_SIZE;
     Color color;
 
 
+    if (c == ' ') {
+        return;
+    }
+
+    switch (c) {
+        case 'X':
+            color = BLACK;
+            break;
+        case 'C':
+            color = YELLOW;
+            break;
+        case 'Z':
+            color = RED;
+            break;
+        }
+
+    DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, color);
+}
+
+void drawMap(MapSection loadedMap[2]) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH; j++) {
-            x = j * CELL_SIZE;
-            y = i * CELL_SIZE;
-
-            if (map[i][j] != ' ') {
-                switch (map[i][j]) {
-                    case 'X':
-                        color = BLACK;
-                        break;
-                    case 'C':
-                        color = YELLOW;
-                        break;
-                    case 'Z':
-                        color = RED;
-                        break;
-                }
-
-                DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, color);
-            }
+            drawCell(loadedMap[0][i][j], j, i);
         }
+    }
+
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        drawCell(loadedMap[1][i][0], SECTION_WIDTH, i);
     }
 }
 

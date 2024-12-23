@@ -8,7 +8,7 @@
 typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR } GameScreen;
 
 
-int main(void) {
+int main() {
     // Initialization
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
     SetTargetFPS(60);
@@ -20,6 +20,7 @@ int main(void) {
     MapSection loadedMap[2] = {0};
     MapSection mapSections[TOTAL_SECTIONS] = {0};
     int isMapRead = 0;
+    float levelSpeed = 0.2;
 
 
     //--------------------------------------------------------------------------------------
@@ -56,11 +57,10 @@ int main(void) {
                     loadMapInto(loadedMap[1], mapSections);
                 }
 
-                if (framesCounter % 3 == 0) {
-                    moveMap(loadedMap);
-                }
+                moveMap(levelSpeed, loadedMap);
 
-                if (framesCounter % (3 * SECTION_WIDTH) == 0) {
+
+                if (framesCounter % (int)(1 / levelSpeed * SECTION_WIDTH) == 0) {
                     loadMapInto(loadedMap[1], mapSections);
                 }
 
@@ -79,7 +79,6 @@ int main(void) {
                 case HOME:
                     // TODO: Draw LOGO screen here!
                     DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
-                    DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
                     break;
 
                 case TITLE:
@@ -93,7 +92,7 @@ int main(void) {
                     // TODO: Draw GAMEPLAY screen here!
                     DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
                     DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
-                    drawMap(loadedMap[0]);
+                    drawMap(loadedMap);
                     break;
 
                 default: break;
