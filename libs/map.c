@@ -11,6 +11,14 @@
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
 #define CELL_SIZE 64
 
+typedef struct Player {
+    Vector2 position;     // Posição do jogador (x, y)
+    Texture2D texture;    // Textura do jogador
+    float velocityY;      // Velocidade vertical
+    float gravity;        // Intensidade da gravidade
+    int gridX;            // Posição fixa no grid (coluna 6)
+} Player;
+
 // This value is used to draw the map more fluidly
 float offsetX = 0;
 
@@ -47,7 +55,7 @@ int readMapFile(int levelNumber, MapSection mapSections[TOTAL_SECTIONS]) {
         }
 
         if (fgetc(file) != '\n') {
-            printf("Erro: esperado caractere de nova linha ap�s a linha %d.\n", i + 1);
+            printf("Erro: esperado caractere de nova linha apos a linha %d.\n", i + 1);
             fclose(file);
             return 0;
         }
@@ -104,41 +112,73 @@ void moveMap(float speed, MapSection loadedSections[2]) {
     }
 }
 
-void drawCell(char c, int coordX, int coordY) {
+void drawCell(char c, int coordX, int coordY, Texture2D wallTexture, Texture2D coinTexture) {
     int x = (coordX * CELL_SIZE) - (offsetX * CELL_SIZE);
     int y = coordY * CELL_SIZE;
-    Color color;
-
 
     if (c == ' ') {
-        return;
+        return; // Célula vazia, nada para desenhar
     }
 
     switch (c) {
-        case 'X':
-            color = BLACK;
+        case 'Z':  // Parede
+            DrawTexture(wallTexture, x, y, WHITE);
             break;
-        case 'C':
-            color = YELLOW;
+        case 'C':  // Moeda
+            DrawTexture(coinTexture, x, y, WHITE);
             break;
-        case 'Z':
-            color = RED;
+        case 'X':  // Obstáculo ou outro elemento (opcional)
+            DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, BLACK); // Ou adicione outra textura aqui
             break;
-        }
-
-    DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, color);
+    }
 }
 
-void drawMap(MapSection loadedMap[2]) {
+
+void drawMap(MapSection loadedMap[2], Texture2D wallTexture, Texture2D coinTexture) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH; j++) {
-            drawCell(loadedMap[0][i][j], j, i);
+            drawCell(loadedMap[0][i][j], j, i, wallTexture, coinTexture);
         }
     }
 
     for (int i = 0; i < MAP_HEIGHT; i++) {
-        drawCell(loadedMap[1][i][0], SECTION_WIDTH, i);
+        drawCell(loadedMap[1][i][0], SECTION_WIDTH, i, wallTexture, coinTexture);
     }
 }
 
+void initializePlayer(Player *player, Vector2 startPosition, Texture2D texture) {
+    player->gridX = 6;  // Coluna fixa no grid
+    player->position = startPosition;
+    player->texture = texture;
+    player->velocityY = 0.0f;  // Velocidade inicial
+    player->gravity = 0.5f;    // Gravidade padrão
+}
 
+void movePlayer(Player *player) {
+    // Aplique a gravidade
+    player->velocityY += player->gravity;
+
+    // Controle para subir
+    if (IsKeyDown(KEY_UP)) {
+        player->velocityY = -8.0f; // Impulso para cima
+    }
+
+    // Atualize a posição vertical
+    player->position.y += player->velocityY;
+
+    // Restrinja o jogador dentro dos limites da tela
+    if (player->position.y < 0) {
+        player->position.y = 0;
+        player->velocityY = 0; // Evita "grudar" no topo
+    }
+
+    if (player->position.y > SCREEN_HEIGHT - player->texture.height) {
+        player->position.y = SCREEN_HEIGHT - player->texture.height;
+        player->velocityY = 0; // Evita ultrapassar o chão
+    }
+}
+
+void drawPlayer(Player *player) {
+    // Desenha o jogador fixo na coluna 6
+    DrawTexture(player->texture, player->gridX * CELL_SIZE, player->position.y, WHITE);
+}

@@ -14,6 +14,12 @@ int main() {
     SetTargetFPS(60);
     srand(time(NULL));
 
+    Texture2D wallTexture = LoadTexture("resources/wall.png");
+    Texture2D coinTexture = LoadTexture("resources/coin.png");
+    Texture2D playerTexture = LoadTexture("resources/player.png");
+
+    Player player = {0};
+    initializePlayer(&player, (Vector2){6 * CELL_SIZE, SCREEN_HEIGHT / 2}, playerTexture);
 
     int framesCounter = 0;
     GameScreen currentScreen = HOME;
@@ -92,7 +98,10 @@ int main() {
                     // TODO: Draw GAMEPLAY screen here!
                     DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
                     DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
-                    drawMap(loadedMap);
+                    movePlayer(&player);               // Atualiza o movimento vertical do jogador
+                    drawMap(loadedMap, wallTexture, coinTexture); // Desenha o mapa movendo-se da direita para a esquerda
+                    drawPlayer(&player);               // Desenha o jogador
+
                     break;
 
                 default: break;
@@ -105,6 +114,10 @@ int main() {
 
     // De-Initialization
     // TODO: Unload all loaded data (textures, fonts, audio) here!
+    
+    UnloadTexture(wallTexture);
+    UnloadTexture(coinTexture);
+    UnloadTexture(playerTexture);
 
     CloseWindow();
 
