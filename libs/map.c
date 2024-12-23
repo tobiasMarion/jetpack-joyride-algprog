@@ -112,6 +112,7 @@ void moveMap(float speed, MapSection loadedSections[2]) {
     }
 }
 
+
 void drawCell(char c, int coordX, int coordY, Texture2D wallTexture, Texture2D coinTexture) {
     int x = (coordX * CELL_SIZE) - (offsetX * CELL_SIZE);
     int y = coordY * CELL_SIZE;
@@ -120,12 +121,15 @@ void drawCell(char c, int coordX, int coordY, Texture2D wallTexture, Texture2D c
         return; // Célula vazia, nada para desenhar
     }
 
+    Rectangle sourceRect = {0, 0, (float)wallTexture.width, (float)wallTexture.height}; // Retângulo de origem (tamanho original da textura)
+    Rectangle destRect = {x, y, CELL_SIZE, CELL_SIZE}; // Retângulo de destino com o tamanho da célula
+
     switch (c) {
         case 'Z':  // Parede
-            DrawTexture(wallTexture, x, y, WHITE);
+            DrawTexturePro(wallTexture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
             break;
         case 'C':  // Moeda
-            DrawTexture(coinTexture, x, y, WHITE);
+            DrawTexturePro(coinTexture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
             break;
         case 'X':  // Obstáculo ou outro elemento (opcional)
             DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, BLACK); // Ou adicione outra textura aqui
@@ -178,7 +182,12 @@ void movePlayer(Player *player) {
     }
 }
 
+
 void drawPlayer(Player *player) {
-    // Desenha o jogador fixo na coluna 6
-    DrawTexture(player->texture, player->gridX * CELL_SIZE, player->position.y, WHITE);
+    // Redefine a fonte da textura para ser proporcional ao tamanho da célula
+    Rectangle sourceRect = {0, 0, (float)player->texture.width, (float)player->texture.height};
+    Rectangle destRect = {(float)(player->gridX * CELL_SIZE), player->position.y, CELL_SIZE, CELL_SIZE}; // Destino com o tamanho da célula
+
+    // Desenha o jogador com a textura redimensionada
+    DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
 }
