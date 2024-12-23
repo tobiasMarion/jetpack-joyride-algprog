@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "./libs/map.c"
 
-#define CELL_SIZE 64
 #define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE
 #define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE
 
@@ -13,27 +12,26 @@ int main(void) {
     // Initialization
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
     SetTargetFPS(60);
+    srand(time(NULL));
+
 
     int framesCounter = 0;
     GameScreen currentScreen = HOME;
-    char loadedMap[MAP_HEIGHT][SECTION_WIDTH * 2] = {0};
-    char mapSections[TOTAL_SECTIONS][MAP_HEIGHT][SECTION_WIDTH] = {0};
-    int isMapLoaded = 0;
+    MapSection loadedMap[2] = {0};
+    MapSection mapSections[TOTAL_SECTIONS] = {0};
+    int isMapRead = 0;
 
 
     //--------------------------------------------------------------------------------------
 
     // Main game loop
     while (!WindowShouldClose()) {
+        framesCounter++;
+
         // Mechanics
         switch(currentScreen) {
             case HOME:
                 if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP)) {
-                    if (!isMapLoaded) {
-                        isMapLoaded = readMapFile(1, mapSections);
-                        printMap(mapSections);
-                    }
-
                     currentScreen = TITLE;
                 }
 
@@ -49,6 +47,21 @@ int main(void) {
             case GAMEPLAY:
                 if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP)) {
                     currentScreen = TITLE;
+                }
+
+                if (!isMapRead) {
+                    isMapRead = readMapFile(1, mapSections);
+
+                    loadMapInto(loadedMap[0], mapSections);
+                    loadMapInto(loadedMap[1], mapSections);
+                }
+
+                if (framesCounter % 3 == 0) {
+                    moveMap(loadedMap);
+                }
+
+                if (framesCounter % (3 * SECTION_WIDTH) == 0) {
+                    loadMapInto(loadedMap[1], mapSections);
                 }
 
                 break;
@@ -78,9 +91,9 @@ int main(void) {
 
                 case GAMEPLAY:
                     // TODO: Draw GAMEPLAY screen here!
-                    DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, PURPLE);
                     DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
                     DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
+                    drawMap(loadedMap[0]);
                     break;
 
                 default: break;
