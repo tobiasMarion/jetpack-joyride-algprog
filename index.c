@@ -2,8 +2,8 @@
 #include "raylib.h"
 #include "./libs/map.c"
 
-#define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE
-#define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE
+#define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE //1920
+#define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE   //768
 
 typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR } GameScreen;
 
@@ -96,6 +96,7 @@ int main() {
 
                 case GAMEPLAY:
                     // TODO: Draw GAMEPLAY screen here!
+                    DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD); //Mostra na tela a quantidade de moedas do jogador.
                     DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
                     DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
                     movePlayer(&player);               // Atualiza o movimento vertical do jogador

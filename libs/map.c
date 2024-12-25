@@ -16,7 +16,8 @@ typedef struct Player {
     Texture2D texture;    // Textura do jogador
     float velocityY;      // Velocidade vertical
     float gravity;        // Intensidade da gravidade
-    int gridX;            // Posição fixa no grid (coluna 6)
+    int gridX;          // Posição fixa no grid (coluna 6)
+    int coins;     //quantidade de moedas do jogador
 } Player;
 
 // This value is used to draw the map more fluidly
@@ -158,7 +159,8 @@ void initializePlayer(Player *player, Vector2 startPosition, Texture2D texture) 
     player->position = startPosition;
     player->texture = texture;
     player->velocityY = 0.0f;  // Velocidade inicial
-    player->gravity = 0.5f;    // Gravidade padrão
+    player->gravity = 0.5f;  // Gravidade padrão
+    player->coins = 0;
 }
 
 void movePlayer(Player *player) {
