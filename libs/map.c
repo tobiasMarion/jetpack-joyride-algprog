@@ -11,18 +11,27 @@
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
 #define CELL_SIZE 64
 
-typedef struct Player {
-    Vector2 position;     // Posição do jogador (x, y)
-    Texture2D texture;    // Textura do jogador
-    float velocityY;      // Velocidade vertical
-    float gravity;        // Intensidade da gravidade
-    int gridX;            // Posição fixa no grid (coluna 6)
-} Player;
-
 // This value is used to draw the map more fluidly
 float offsetX = 0;
 
+typedef struct MapTextures {
+    Texture2D coinTexture;
+    Texture2D spikeTexture;
+    Texture2D wallTexture;
+} MapTextures;
+
 typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
+
+int isValidChar(char c) {
+    char validChars[] = "XCZ ";
+
+    if (strchr(validChars, c) == NULL) {
+        return 0;
+    }
+
+    return 1;
+
+}
 
 int readMapFile(int levelNumber, MapSection mapSections[TOTAL_SECTIONS]) {
     FILE *file = NULL;
@@ -43,7 +52,7 @@ int readMapFile(int levelNumber, MapSection mapSections[TOTAL_SECTIONS]) {
         for (int j = 0; j < MAP_WIDTH; j++) {
             a = fgetc(file);
 
-            if (strchr(validChars, a) == NULL) {
+            if (!isValidChar(a)) {
                 printf("Caractere invalido '%c' encontrado na linha %d, coluna %d\n", a, i + 1, j + 1);
                 fclose(file);
                 return 0;
@@ -112,90 +121,44 @@ void moveMap(float speed, MapSection loadedSections[2]) {
     }
 }
 
+void drawCell(char c, int coordX, int coordY, MapTextures *mapTextures) {
+    if (c == ' ' || !isValidChar(c)) {
+        return;
+    }
 
-void drawCell(char c, int coordX, int coordY, Texture2D wallTexture, Texture2D coinTexture) {
     int x = (coordX * CELL_SIZE) - (offsetX * CELL_SIZE);
     int y = coordY * CELL_SIZE;
-
-    if (c == ' ') {
-        return; // Célula vazia, nada para desenhar
-    }
-
-    Rectangle sourceRect = {0, 0, (float)wallTexture.width, (float)wallTexture.height}; // Retângulo de origem (tamanho original da textura)
-    Rectangle destRect = {x, y, CELL_SIZE, CELL_SIZE}; // Retângulo de destino com o tamanho da célula
+    Texture2D texture;
 
     switch (c) {
-        case 'Z':  // Parede
-            DrawTexturePro(wallTexture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
+        case 'Z':
+            texture = mapTextures->spikeTexture;
             break;
-        case 'C':  // Moeda
-            // Para a moeda, vamos garantir que ela tenha o tamanho correto na célula
-            sourceRect = (Rectangle){0, 0, (float)coinTexture.width, (float)coinTexture.height};
-            destRect = (Rectangle){x, y, CELL_SIZE, CELL_SIZE};
-            DrawTexturePro(coinTexture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
+
+        case 'C':
+            texture = mapTextures->coinTexture;
             break;
-        case 'X':  // Obstáculo ou outro elemento (opcional)
-            DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, BLACK); // Ou adicione outra textura aqui
+
+        case 'X':
+            texture = mapTextures->wallTexture;
             break;
     }
+
+    Rectangle cellRectangle = {x, y, CELL_SIZE, CELL_SIZE};
+    Rectangle sourceRectangle = {0, 0, texture.width, texture.height};
+    Vector2 anchorPoint = {0, 0};
+
+    DrawTexturePro(texture, sourceRectangle, cellRectangle, anchorPoint, 0, WHITE);
 }
 
-
-void drawMap(MapSection loadedMap[2], Texture2D wallTexture, Texture2D coinTexture) {
+void drawMap(MapSection loadedMap[2], MapTextures *mapTextures) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH; j++) {
-            drawCell(loadedMap[0][i][j], j, i, wallTexture, coinTexture);
+            drawCell(loadedMap[0][i][j], j, i, mapTextures);
         }
     }
 
     for (int i = 0; i < MAP_HEIGHT; i++) {
-        drawCell(loadedMap[1][i][0], SECTION_WIDTH, i, wallTexture, coinTexture);
+        drawCell(loadedMap[1][i][0], SECTION_WIDTH, i, mapTextures);
     }
 }
-
-void initializePlayer(Player *player, Vector2 startPosition, Texture2D texture) {
-    player->gridX = 6;  // Coluna fixa no grid
-    player->position = startPosition;
-    player->texture = texture;
-    player->velocityY = 0.0f;  // Velocidade inicial
-    player->gravity = 0.5f;    // Gravidade padrão
-}
-
-void movePlayer(Player *player) {
-    // Aplique a gravidade
-    player->velocityY += player->gravity;
-
-    // Controle para subir
-    if (IsKeyDown(KEY_UP)) {
-        player->velocityY = -8.0f; // Impulso para cima
-    }
-
-    // Atualize a posição vertical
-    player->position.y += player->velocityY;
-
-    // Restrinja o jogador dentro dos limites da tela
-    if (player->position.y < CELL_SIZE) {
-        player->position.y = CELL_SIZE;
-        player->velocityY = 0; // Evita "grudar" no topo
-    }
-
-    if (player->position.y > (MAP_HEIGHT - 2) * CELL_SIZE) {
-        player->position.y = (MAP_HEIGHT - 2) * CELL_SIZE;
-        player->velocityY = 0; // Evita ultrapassar o chão
-    }
-}
-
-
-void drawPlayer(Player *player) {
-    // Para o jogador, vamos redimensionar a textura para o tamanho da célula
-    Rectangle sourceRect = {0, 0, (float)player->texture.width, (float)player->texture.height};
-    Rectangle destRect = {(float)(player->gridX * CELL_SIZE), player->position.y, CELL_SIZE, CELL_SIZE}; // Destino com o tamanho da célula
-
-    // Ajustando o tamanho do jogador para que ele se ajuste à célula
-    float scaleX = CELL_SIZE / (float)player->texture.width;
-    float scaleY = CELL_SIZE / (float)player->texture.height;
-
-    // Desenha o jogador com a textura redimensionada
-    DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
-}
-
