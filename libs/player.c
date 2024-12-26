@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <math.h>
 #define INITIAL_X_POSITION 6
 #define INITIAL_JUMP_POWER -1.2
 #define MIN_Y_SPEED -10
@@ -31,8 +32,8 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->speedY = 0;
     player->lives = 3;
     player->coins = 0;
-    player->isInvulnerable = 0;
-    player->invulnerableUntill = 0;
+    player->isInvulnerable = 1;
+    player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
 }
 
 void movePlayer(Player *player, float speedToAdd) {
@@ -40,16 +41,6 @@ void movePlayer(Player *player, float speedToAdd) {
     player->speedY = minMax(player->speedY, MIN_Y_SPEED, MAX_Y_SPEED);
 
     player->positionY += player->speedY;
-
-    if (player->positionY < CELL_SIZE) {
-        player->positionY = CELL_SIZE;
-        player->speedY = 0;
-    }
-
-    if (player->positionY > (MAP_HEIGHT - 2) * CELL_SIZE) {
-        player->positionY = (MAP_HEIGHT - 2) * CELL_SIZE;
-        player->speedY = 0;
-    }
 }
 
 void drawPlayer(Player *player) {
@@ -65,12 +56,24 @@ void drawPlayer(Player *player) {
 }
 
 int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+    int y = (int)player->positionY / CELL_SIZE;
+    int x = round(INITIAL_X_POSITION + offsetX);
+
+    if (player->speedY < 0 && map[y][x] == 'X') {
+        player->speedY = 0;
+        player->positionY = (y + 1) * CELL_SIZE;
+        y++;
+    }
+
+    if (player->speedY > 0 && map[y+1][x] == 'X') {
+        player->speedY = 0;
+        player->positionY = y * CELL_SIZE;
+        y--;
+    }
+
     if (player->isInvulnerable) {
         return 0;
     }
-
-    int y = (int)player->positionY / CELL_SIZE;
-    int x = (int)player->gridX + offsetX;
 
     if (map[y][x] == 'C') {
         player->coins += 1;
@@ -93,7 +96,8 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         return 1;
     }
 
-    if (map[y+1][x] == 'Z') {
+    if (map[y][x+1] == 'X') {
+        printf("[%d][%d]\n", x, y);
         player->lives -= 1;
         player->isInvulnerable = 1;
         player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
