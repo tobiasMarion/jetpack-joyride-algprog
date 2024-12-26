@@ -1,15 +1,23 @@
 #include "raylib.h"
 #define INITIAL_X_POSITION 6
 #define INITIAL_JUMP_POWER -1.2
+#define MIN_Y_SPEED -10
+#define MAX_Y_SPEED 15
+
+typedef struct Sounds {
+    Sound button;
+    Sound coin;
+} Sounds;
 
 typedef struct Player {
     int gridX;
+    int coins;
+    int lives;
     float jumpPower;
     float positionY;
     float speedY;
     Texture2D texture;
 } Player;
-
 
 void initializePlayer(Player *player, char textureName[], float startYPosition) {
     player->gridX = INITIAL_X_POSITION;
@@ -17,12 +25,13 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->texture = LoadTexture(textureName);
     player->positionY = startYPosition * CELL_SIZE;
     player->speedY = 0;
-
+    player->lives = 3;
+    player->coins = 0;
 }
 
 void movePlayer(Player *player, float speedToAdd) {
     player->speedY += speedToAdd;
-    player->speedY = minMax(player->speedY, -10, 20);
+    player->speedY = minMax(player->speedY, MIN_Y_SPEED, MAX_Y_SPEED);
 
     player->positionY += player->speedY;
 
@@ -47,3 +56,21 @@ void drawPlayer(Player *player) {
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
 }
 
+int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+    int y = (int)player->positionY / CELL_SIZE;
+    int x = (int)player->gridX + offsetX;
+
+    if (map[y][x] == 'C') {
+        player->coins += 1;
+        map[y][x] = ' ';
+        PlaySound(sounds->coin);
+    }
+
+    if (map[y+1][x] == 'C') {
+        player->coins += 1;
+        map[y+1][x] = ' ';
+        PlaySound(sounds->coin);
+    }
+
+    return 0;
+}

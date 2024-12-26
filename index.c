@@ -17,12 +17,15 @@ int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
     InitAudioDevice();
     SetTargetFPS(60);
+    int isGameRunning = 1;
 
-    Sound buttonSound1 = LoadSound("resources/sounds/button1.wav");
-    SetSoundVolume(buttonSound1, 1);
+    Sounds sounds = {
+        LoadSound("resources/sounds/button1.wav"),
+        LoadSound("resources/sounds/coin.mp3")
+    };
 
     Player player = {0};
-    initializePlayer(&player, "./resources/player.png", 6);
+    initializePlayer(&player, "resources/player.png", 6);
 
     int framesCounter = 0;
 
@@ -48,7 +51,7 @@ int main() {
 
     //--------------------------------------------------------------------------------------
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && isGameRunning) {
         framesCounter++;
 
         // Mechanics
@@ -93,6 +96,8 @@ int main() {
                     movePlayer(&player, player.jumpPower);
                 }
 
+                checksCollision(&player, loadedMap[0], &sounds);
+
                 break;
 
             case GAMEOVER:
@@ -101,14 +106,14 @@ int main() {
                 if(CheckCollisionPointRec(mousePosition, restartRectangle)) {
 
                     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        PlaySound(buttonSound1);
+                        PlaySound(sounds.button);
                         currentScreen = GAMEPLAY;
                     }
                 }
 
                 if(CheckCollisionPointRec(mousePosition, saveRectangle)) {
                     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        PlaySound(buttonSound1);
+                        PlaySound(sounds.button);
 
 
                     }
@@ -116,18 +121,15 @@ int main() {
 
                 if(CheckCollisionPointRec(mousePosition, menuRectangle)) {
                     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        PlaySound(buttonSound1);
+                        PlaySound(sounds.button);
                         currentScreen = HOME;
                     }
                 }
 
                 if(CheckCollisionPointRec(mousePosition, exitRectangle)) {
                     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                            PlaySound(buttonSound1);
-                            UnloadTexture(wallTexture);
-                            UnloadTexture(coinTexture);
-                            UnloadTexture(playerTexture);
-                            CloseWindow();
+                        PlaySound(sounds.button);
+                        isGameRunning = 0;
                     }
                 }
 
@@ -138,8 +140,6 @@ int main() {
         }
 
         // Draw
-
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
@@ -159,13 +159,15 @@ int main() {
 
             case GAMEPLAY:
                 // TODO: Draw GAMEPLAY screen here!
-                DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED );
-                DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD); //Mostra na tela a quantidade de moedas do jogador.
-                DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
-                DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
-                movePlayer(&player);               // Atualiza o movimento vertical do jogador
-                drawMap(loadedMap, wallTexture, coinTexture); // Desenha o mapa movendo-se da direita para a esquerda
-                drawPlayer(&player);               // Desenha o jogador
+                if (isMapRead) {
+                    DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED );
+                    DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
+                    DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
+                    DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
+                    drawMap(loadedMap, &mapTextures);
+                    drawPlayer(&player);
+                }
+
 
                 break;
 
@@ -204,6 +206,8 @@ int main() {
     UnloadTexture(mapTextures.spikeTexture);
     UnloadTexture(mapTextures.wallTexture);
     UnloadTexture(player.texture);
+    UnloadSound(sounds.button);
+    UnloadSound(sounds.coin);
 
     CloseWindow();
 
