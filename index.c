@@ -5,6 +5,8 @@
 
 #define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE
 #define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE
+#define CELL_SIZE 64
+#define GRAVITY 0.8
 
 typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR } GameScreen;
 
@@ -29,7 +31,6 @@ int main() {
 
     Player player = {0};
     initializePlayer(&player, "./resources/player.png", 6);
-
 
     srand(time(NULL));
 
@@ -70,7 +71,11 @@ int main() {
                     loadMapInto(loadedMap[1], mapSections);
                 }
 
-                movePlayer(&player);
+                movePlayer(&player, GRAVITY);
+
+                if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
+                    movePlayer(&player, player.jumpPower);
+                }
 
                 break;
 

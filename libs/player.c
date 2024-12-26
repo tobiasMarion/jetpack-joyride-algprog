@@ -1,10 +1,10 @@
 #include "raylib.h"
-
-#define GRAVITY 0.5
 #define INITIAL_X_POSITION 6
+#define INITIAL_JUMP_POWER -1.2
 
 typedef struct Player {
     int gridX;
+    float jumpPower;
     float positionY;
     float speedY;
     Texture2D texture;
@@ -13,17 +13,16 @@ typedef struct Player {
 
 void initializePlayer(Player *player, char textureName[], float startYPosition) {
     player->gridX = INITIAL_X_POSITION;
+    player->jumpPower = INITIAL_JUMP_POWER;
     player->texture = LoadTexture(textureName);
     player->positionY = startYPosition * CELL_SIZE;
     player->speedY = 0;
+
 }
 
-void movePlayer(Player *player) {
-    player->speedY += GRAVITY;
-
-    if (IsKeyDown(KEY_UP)) {
-        player->speedY = -8.0;
-    }
+void movePlayer(Player *player, float speedToAdd) {
+    player->speedY += speedToAdd;
+    player->speedY = minMax(player->speedY, -10, 20);
 
     player->positionY += player->speedY;
 
