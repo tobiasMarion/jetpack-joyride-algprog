@@ -1,8 +1,9 @@
-#include <time.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include <time.h>
 
 int getRandIntBetween(int min, int max) {
+    srand(time(NULL));
+
     if (min > max) {
         int temp = min;
         min = max;
@@ -12,17 +13,13 @@ int getRandIntBetween(int min, int max) {
 }
 
 float minMax(float value, float min, float max) {
-    printf("%f %f %f\n", value, min, max);
     if (value < min) {
-        printf("menor");
         return min;
     }
 
     if (value > max) {
-        printf("maior");
         return max;
     }
 
-    printf("certo");
     return value;
 }

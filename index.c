@@ -32,9 +32,6 @@ int main() {
     Player player = {0};
     initializePlayer(&player, "./resources/player.png", 6);
 
-    srand(time(NULL));
-
-
     //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose()) {
@@ -62,6 +59,7 @@ int main() {
 
                     loadMapInto(loadedMap[0], mapSections);
                     loadMapInto(loadedMap[1], mapSections);
+                    break;
                 }
 
                 moveMap(levelSpeed, loadedMap);
@@ -104,7 +102,6 @@ int main() {
                 // TODO: Draw GAMEPLAY screen here!
                 drawMap(loadedMap, &mapTextures);
                 drawPlayer(&player);
-
                 break;
 
             default: break;
@@ -117,8 +114,9 @@ int main() {
 
     // De-Initialization
     // TODO: Unload all loaded data (textures, fonts, audio) here!
-    UnloadTexture(mapTextures.spikeTexture);
     UnloadTexture(mapTextures.coinTexture);
+    UnloadTexture(mapTextures.spikeTexture);
+    UnloadTexture(mapTextures.wallTexture);
     UnloadTexture(player.texture);
 
     CloseWindow();
