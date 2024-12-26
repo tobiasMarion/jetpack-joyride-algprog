@@ -10,6 +10,7 @@
 #define SECTION_WIDTH 30
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
 #define CELL_SIZE 64
+#define SAVE_FILE_NAME "save.bin"
 
 // This value is used to draw the map more fluidly
 float offsetX = 0;
