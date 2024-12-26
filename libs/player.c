@@ -3,16 +3,20 @@
 #define INITIAL_JUMP_POWER -1.2
 #define MIN_Y_SPEED -10
 #define MAX_Y_SPEED 15
+#define INVULNERABLE_AFTER_HIT_DURATION 1;
 
 typedef struct Sounds {
     Sound button;
     Sound coin;
+    Sound hit;
 } Sounds;
 
 typedef struct Player {
     int gridX;
     int coins;
     int lives;
+    int isInvulnerable;
+    float invulnerableUntill;
     float jumpPower;
     float positionY;
     float speedY;
@@ -27,6 +31,8 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->speedY = 0;
     player->lives = 3;
     player->coins = 0;
+    player->isInvulnerable = 0;
+    player->invulnerableUntill = 0;
 }
 
 void movePlayer(Player *player, float speedToAdd) {
@@ -53,10 +59,16 @@ void drawPlayer(Player *player) {
     float scaleX = CELL_SIZE / (float)player->texture.width;
     float scaleY = CELL_SIZE / (float)player->texture.height;
 
-    DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
+    Color color = player->isInvulnerable ? RED : WHITE;
+
+    DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, color);
 }
 
 int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+    if (player->isInvulnerable) {
+        return 0;
+    }
+
     int y = (int)player->positionY / CELL_SIZE;
     int x = (int)player->gridX + offsetX;
 
@@ -70,6 +82,24 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->coins += 1;
         map[y+1][x] = ' ';
         PlaySound(sounds->coin);
+    }
+
+    if (map[y][x] == 'Z') {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+
+        return 1;
+    }
+
+    if (map[y+1][x] == 'Z') {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+
+        return 1;
     }
 
     return 0;

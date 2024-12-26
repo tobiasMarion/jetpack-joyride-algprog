@@ -6,7 +6,7 @@
 #define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE
 #define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE
 #define CELL_SIZE 64
-#define GRAVITY 0.8
+#define GRAVITY 0.6
 
 
 typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR, GAMEOVER } GameScreen;
@@ -21,7 +21,8 @@ int main() {
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
-        LoadSound("resources/sounds/coin.mp3")
+        LoadSound("resources/sounds/coin.mp3"),
+        LoadSound("resources/sounds/hit.mp3")
     };
 
     Player player = {0};
@@ -90,6 +91,10 @@ int main() {
                     loadMapInto(loadedMap[1], mapSections);
                 }
 
+                if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
+                    player.isInvulnerable = 0;
+                }
+
                 movePlayer(&player, GRAVITY);
 
                 if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
@@ -114,8 +119,6 @@ int main() {
                 if(CheckCollisionPointRec(mousePosition, saveRectangle)) {
                     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                         PlaySound(sounds.button);
-
-
                     }
                 }
 
