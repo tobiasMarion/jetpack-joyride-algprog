@@ -2,21 +2,26 @@
 #include "raylib.h"
 #include "./libs/map.c"
 
-#define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE //1920
-#define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE   //768
+#define SCREEN_WIDTH SECTION_WIDTH * CELL_SIZE
+#define SCREEN_HEIGHT MAP_HEIGHT * CELL_SIZE
 
-typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR } GameScreen;
+
+typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR, GAMEOVER } GameScreen;
 
 
 int main() {
     // Initialization
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
+    InitAudioDevice();
     SetTargetFPS(60);
     srand(time(NULL));
 
     Texture2D wallTexture = LoadTexture("resources/wall.png");
     Texture2D coinTexture = LoadTexture("resources/coin.png");
     Texture2D playerTexture = LoadTexture("resources/player.png");
+
+    Sound buttonSound1 = LoadSound("resources/sounds/button1.wav");
+    SetSoundVolume(buttonSound1, 1);
 
     Player player = {0};
     initializePlayer(&player, (Vector2){6 * CELL_SIZE, SCREEN_HEIGHT / 2}, playerTexture);
@@ -27,6 +32,13 @@ int main() {
     MapSection mapSections[TOTAL_SECTIONS] = {0};
     int isMapRead = 0;
     float levelSpeed = 0.2;
+
+    int RECTANGLE_WIDTH = 500;
+    int RECTANGLE_HEIGHT = 100;
+    Rectangle restartRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2 , 200 , RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle saveRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2 , 325, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle menuRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2 , 450 , RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle exitRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2 , 575, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
 
 
     //--------------------------------------------------------------------------------------
@@ -70,6 +82,48 @@ int main() {
                     loadMapInto(loadedMap[1], mapSections);
                 }
 
+                if(player.lives < 0 || IsKeyPressed(KEY_G)) {
+                    currentScreen = GAMEOVER;
+                }
+
+                break;
+
+            case GAMEOVER:
+                Vector2 mousePosition = GetMousePosition();
+
+                if(CheckCollisionPointRec(mousePosition, restartRectangle)) {
+
+                    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        PlaySound(buttonSound1);
+                        currentScreen = GAMEPLAY;
+                    }
+                }
+
+                if(CheckCollisionPointRec(mousePosition, saveRectangle)) {
+                    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        PlaySound(buttonSound1);
+
+
+                    }
+                }
+
+                if(CheckCollisionPointRec(mousePosition, menuRectangle)) {
+                    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        PlaySound(buttonSound1);
+                        currentScreen = HOME;
+                    }
+                }
+
+                if(CheckCollisionPointRec(mousePosition, exitRectangle)) {
+                    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                            PlaySound(buttonSound1);
+                            UnloadTexture(wallTexture);
+                            UnloadTexture(coinTexture);
+                            UnloadTexture(playerTexture);
+                            CloseWindow();
+                    }
+                }
+
                 break;
 
 
@@ -77,6 +131,8 @@ int main() {
         }
 
         // Draw
+
+
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
@@ -96,6 +152,7 @@ int main() {
 
                 case GAMEPLAY:
                     // TODO: Draw GAMEPLAY screen here!
+                    DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED );
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD); //Mostra na tela a quantidade de moedas do jogador.
                     DrawText("GAMEPLAY SCREEN", 20, 20, 40, MAROON);
                     DrawText("PRESS ENTER or TAP to JUMP to TITLE SCREEN", 130, 220, 20, MAROON);
@@ -104,6 +161,27 @@ int main() {
                     drawPlayer(&player);               // Desenha o jogador
 
                     break;
+
+                case GAMEOVER:
+                    DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
+
+
+
+                    DrawRectangleRec(restartRectangle, BLACK);
+                    DrawText("Restart Game", (SCREEN_WIDTH - MeasureText("Restart Game",40)) / 2, 228, 40, WHITE);
+
+                    DrawRectangleRec(saveRectangle, BLACK);
+                    DrawText("Save Game", (SCREEN_WIDTH - MeasureText("Save Game",40)) / 2, 353, 40, WHITE);
+
+                    DrawRectangleRec(menuRectangle, BLACK);
+                    DrawText("Back to menu", (SCREEN_WIDTH - MeasureText("Back to menu",40)) / 2, 478, 40, WHITE);
+
+                    DrawRectangleRec(exitRectangle, BLACK);
+                    DrawText("Exit Game", (SCREEN_WIDTH - MeasureText("Exit Game",40)) / 2, 603, 40, WHITE);
+
+                    break;
+
+
 
                 default: break;
             }

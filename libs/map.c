@@ -10,14 +10,19 @@
 #define SECTION_WIDTH 30
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
 #define CELL_SIZE 64
+#define SAVE_FILE_NAME "save.bin"
 
 typedef struct Player {
+
+
     Vector2 position;     // Posição do jogador (x, y)
     Texture2D texture;    // Textura do jogador
     float velocityY;      // Velocidade vertical
     float gravity;        // Intensidade da gravidade
-    int gridX;          // Posição fixa no grid (coluna 6)
-    int coins;     //quantidade de moedas do jogador
+    int gridX;            // Posição fixa no grid (coluna 6)
+    int coins;            //quantidade de moedas do jogador
+    int lives;             //quantidade de vidas do jogador
+
 } Player;
 
 // This value is used to draw the map more fluidly
@@ -161,6 +166,7 @@ void initializePlayer(Player *player, Vector2 startPosition, Texture2D texture) 
     player->velocityY = 0.0f;  // Velocidade inicial
     player->gravity = 0.5f;  // Gravidade padrão
     player->coins = 0;
+    player->lives = 3;
 }
 
 void movePlayer(Player *player) {
@@ -200,4 +206,52 @@ void drawPlayer(Player *player) {
     // Desenha o jogador com a textura redimensionada
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, WHITE);
 }
+
+
+//Função que de fato salva a struct no arquivo binario
+int saveGame( Player player, char *filename)
+{
+    //abre ou cria um arquivo binario.
+    FILE *arq = fopen(filename, "a");
+    if( arq == NULL) {return 1;}
+
+    size_t result = fwrite(&player, sizeof(Player), 1, arq);
+    if(result != 1) {printf("\nFILEBINERROR: error when write on save.bin"); return 2;}
+    fclose(arq);
+    return 0;
+}
+
+/*int verifySave( Player player, char *filename)
+{
+    FILE *arq = fopen(filename, "r+");
+    if( arq == NULL) {return 1;}
+
+    fseek(arq, 0, SEEK_END);
+    long fileSize = ftell(arq) / sizeof(Player);
+    fseek(arq,0,SEEK_SET);
+    int i;
+    Player atual;
+
+    //verifica se o nome do jogador já esta salva no arquivo save.bin
+    for(i = 0; i < fileSize; i++)
+    {
+        fread(&atual, sizeof(Player), 1, arq );
+        //Se já existir o nome do jogador nos arquivos do game, não salva.
+        if(strcmp( player.name, atual.name ) == 0)  {return 3;}
+    }
+
+    //Salva a struct no arquivo e analisa o retorno
+    size_t result = saveGame(player, filename);
+
+    switch(result){
+        //Se saveGame , retornar zero, salvo com sucesso
+        case 0:
+            fclose(arq);
+            return 0;
+            break;
+        //Se saveGame retornar 1, erro ao abrir o arquivo binario
+        case 1:
+    }
+}
+*/
 
