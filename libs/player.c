@@ -22,6 +22,7 @@ typedef struct Player {
     float positionY;
     float speedY;
     Texture2D texture;
+
 } Player;
 
 void initializePlayer(Player *player, char textureName[], float startYPosition) {
@@ -34,6 +35,7 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->coins = 0;
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+
 }
 
 void movePlayer(Player *player, float speedToAdd) {
