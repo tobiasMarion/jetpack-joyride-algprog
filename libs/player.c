@@ -5,6 +5,7 @@
 #define MIN_Y_SPEED -10
 #define MAX_Y_SPEED 15
 #define INVULNERABLE_AFTER_HIT_DURATION 1;
+#define MAX_INPUT_CHARS 15
 
 typedef struct Sounds {
     Sound button;
@@ -22,6 +23,7 @@ typedef struct Player {
     float positionY;
     float speedY;
     Texture2D texture;
+    char name[MAX_INPUT_CHARS + 1];
 
 } Player;
 
@@ -35,6 +37,7 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->coins = 0;
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+    player->name[0] = '\0';
 
 }
 

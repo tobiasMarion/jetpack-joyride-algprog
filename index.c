@@ -23,6 +23,7 @@ int main() {
     InitAudioDevice();
     SetTargetFPS(60);
     int isGameRunning = 1;
+    int letterCount = 0;
     Vector2 mousePosition = GetMousePosition();
 
     Sounds sounds = {
@@ -69,7 +70,8 @@ int main() {
 
     };
 
-    Rectangle textBox = {(SCREEN_WIDTH - 700 ) / 2 , 400, 700, 100};
+    Rectangle textBox = {(SCREEN_WIDTH - 700 ) / 2 , 400, 700, 85};
+    Rectangle outlineTextBox = {((SCREEN_WIDTH - 700 ) / 2) - 5  , 400 - 5, 710, 95};
 
 
     //--------------------------------------------------------------------------------------
@@ -171,6 +173,31 @@ int main() {
 
             case SAVEGAME:
 
+                //TextBox
+                if(CheckCollisionPointRec( mousePosition, textBox)) {
+                    DrawRectangleLinesEx(outlineTextBox, 5, DARKGRAY);
+                    int key = GetCharPressed();
+
+                    while ( key > 0)
+                    {
+                        if( (key >= 32) && (key  <= 125) && (letterCount < MAX_INPUT_CHARS))
+                        {
+                            player.name[letterCount] = (char)key;
+                            player.name[letterCount + 1] = '\0';
+                            letterCount++;
+                        }
+                        key = GetCharPressed();
+                    }
+
+
+                if(IsKeyPressed(KEY_BACKSPACE))
+                    {
+                        letterCount--;
+                        if(letterCount < 0) {letterCount = 0;}
+                        player.name[letterCount] = '\0';
+                    }
+                }
+
                 //SaveProgress button
                 if(CheckCollisionPointRec( mousePosition, buttons[4])) {
                     DrawRectangleLinesEx(outline[4], LINE_THICKNESS, GREEN);
@@ -226,13 +253,11 @@ int main() {
             case GAMEOVER:
                 DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
 
-
                 DrawRectangleRec(buttons[0], BLACK);
                 DrawText("Restart Game", (SCREEN_WIDTH - MeasureText("Restart Game",40)) / 2, 228, 40, WHITE);
 
                 DrawRectangleRec(buttons[1], BLACK);
                 DrawText("Save Game", (SCREEN_WIDTH - MeasureText("Save Game",40)) / 2, 353, 40, WHITE);
-
 
                 DrawRectangleRec(buttons[2], BLACK);
                 DrawText("Back to menu", (SCREEN_WIDTH - MeasureText("Back to menu",40)) / 2, 478, 40, WHITE);
@@ -244,10 +269,11 @@ int main() {
 
             case SAVEGAME:
                 DrawText("Save Game menu", (SCREEN_WIDTH - MeasureText("Save Game Menu", 80)) / 2, 80, 80, BLACK );
-                DrawText(TextFormat("You got %d points!", player.points), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!", player.points),40)) / 2, 180, 40, DARKGREEN);
+                DrawText(TextFormat("You got %d points!"), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!"),40)) / 2, 180, 40, DARKGREEN);
 
-              //  DrawText("Name:", )
+                DrawText("Place mouse over input box to write your name!", ( (SCREEN_WIDTH - MeasureText("Place mouse over input box to write your name!",29)) / 2), 350, 29, BLACK);
                 DrawRectangleRec(textBox, GRAY);
+                DrawText(player.name, ((SCREEN_WIDTH - 700) / 2) + 5, 395 , 78, DARKGRAY);
 
                 DrawRectangleRec(buttons[4], DARKGREEN);
                 DrawText( "Save Progress", ((SCREEN_WIDTH - MeasureText("Save Progress", 40)) / 2) - ((RECTANGLE_WIDTH - ( 2 * LINE_THICKNESS)) /2), 603, 40, GREEN);
