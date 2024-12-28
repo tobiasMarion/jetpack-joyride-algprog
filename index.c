@@ -120,9 +120,12 @@ int main() {
                     player.isInvulnerable = 0;
                 }
 
-                movePlayer(&player, GRAVITY);
+                if (!player.isTouchingTheGround) {
+                    movePlayer(&player, GRAVITY);
+                }
 
                 if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
+                    player.isTouchingTheGround = 0;
                     movePlayer(&player, player.jumpPower);
                 }
 
@@ -294,7 +297,6 @@ int main() {
 
 
     // De-Initialization
-    // TODO: Unload all loaded data (textures, fonts, audio) here!
     UnloadTexture(mapTextures.coinTexture);
     UnloadTexture(mapTextures.spikeTexture);
     UnloadTexture(mapTextures.wallTexture);

@@ -17,6 +17,7 @@ typedef struct Player {
     int gridX;
     int coins;
     int lives;
+    int isTouchingTheGround;
     int isInvulnerable;
     float invulnerableUntill;
     float jumpPower;
@@ -33,6 +34,7 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->texture = LoadTexture(textureName);
     player->positionY = startYPosition * CELL_SIZE;
     player->speedY = 0;
+    player->isTouchingTheGround = 0;
     player->lives = 3;
     player->coins = 0;
     player->isInvulnerable = 1;
@@ -63,6 +65,7 @@ void drawPlayer(Player *player) {
 int checksCollision(Player *player, MapSection map, Sounds *sounds) {
     int y = (int)player->positionY / CELL_SIZE;
     int x = round(INITIAL_X_POSITION + offsetX);
+    printf("[%.3d][%.3d]\n", x, y);
 
     if (player->speedY < 0 && map[y][x] == 'X') {
         player->speedY = 0;
@@ -74,6 +77,7 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->speedY = 0;
         player->positionY = y * CELL_SIZE;
         y--;
+        player->isTouchingTheGround = 1;
     }
 
     if (player->isInvulnerable) {
@@ -92,7 +96,7 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         PlaySound(sounds->coin);
     }
 
-    if (map[y][x] == 'Z') {
+    if (map[y+1][x] == 'Z') {
         player->lives -= 1;
         player->isInvulnerable = 1;
         player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
