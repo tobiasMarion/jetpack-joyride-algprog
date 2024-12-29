@@ -1,6 +1,6 @@
 #include "raylib.h"
 
-typedef enum GameScreen { HOME, TITLE, GAMEPLAY, ERROR, GAMEOVER, ENDGAME, SAVEGAME} GameScreen;
+typedef enum GameScreen { HOME, GAMEPLAY, ERROR, GAMEOVER, ENDGAME, SAVEGAME} GameScreen;
 
 int letterCount = 0;
 
@@ -26,6 +26,89 @@ Rectangle outline[] = {
 
 Rectangle outlineTextBox = {((SCREEN_WIDTH - 700 ) / 2) - 5  , 400 - 5, 710, 95};
 Rectangle textBox = {(SCREEN_WIDTH - 700 ) / 2 , 400, 700, 85};
+
+void DrawButton(char label[], int y) {
+    Rectangle button = {
+        BUTTON_POSITION_X_CENTER,
+        y,
+        BUTTON_WIDTH,
+        BUTTON_HEIGHT,
+    };
+
+    Vector2 mousePosition = GetMousePosition();
+    bool isHovering = CheckCollisionPointRec(mousePosition, button);
+
+    if (isHovering) {
+        DrawRectangle(
+            BUTTON_POSITION_X_CENTER - LINE_THICKNESS,
+            y - LINE_THICKNESS,
+            BUTTON_WIDTH + 2 * LINE_THICKNESS,
+            BUTTON_HEIGHT + 2 * LINE_THICKNESS,
+            RED
+        );
+    }
+
+    int labelX = BUTTON_POSITION_X_CENTER + (BUTTON_WIDTH - MeasureText(label, BUTTON_LABEL_SIZE)) / 2;
+    int labelY = y + (BUTTON_HEIGHT - BUTTON_LABEL_SIZE) / 2;
+
+
+    DrawRectangleRec(button, BLACK);
+    DrawText(label, labelX, labelY, BUTTON_LABEL_SIZE, isHovering ? RED : WHITE);
+}
+
+
+void drawHomeScreen(GameScreen *currentScreen, Sound *buttonSoundClick) {
+    Rectangle playRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 200, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
+    Rectangle highscoresRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 325, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
+    Rectangle exitRectangle1 = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 450, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
+    Rectangle restartRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 200, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle saveRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 325, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle menuRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 450, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    Rectangle exitRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 575, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
+    int selectedOption = 0; // O menu começa com "Play" selecionado
+    int selectedOption2 = 0; // O menu começa com "Restart Game" selecionado
+    Color playColor = WHITE;
+    Color highscoresColor = WHITE;
+    Color exitColor = WHITE;
+    Color exitColor2 = WHITE;
+    Color backMenuColor = WHITE;
+    Color saveColor = WHITE;
+    Color restartColor = WHITE;
+
+
+    if (selectedOption == 0) {
+        PlaySound(*buttonSoundClick);
+        playColor = RED;
+        highscoresColor = WHITE;
+        exitColor = WHITE;
+    } else if (selectedOption == 1) {
+        PlaySound(*buttonSoundClick);
+        playColor = WHITE;
+        highscoresColor = RED;
+        exitColor = WHITE;
+    } else if (selectedOption == 2) {
+        PlaySound(*buttonSoundClick);
+        playColor = WHITE;
+        highscoresColor = WHITE;
+        exitColor = RED;
+    }
+
+    if (IsKeyPressed(KEY_DOWN)) {
+        selectedOption = (selectedOption + 1) % 3;
+    } else if (IsKeyPressed(KEY_UP)) {
+        selectedOption = (selectedOption + 2) % 3;
+    }
+}
+
+
+void drawGameOverScreen() {
+    DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
+
+    DrawButton("Restart Game", 228);
+    DrawButton("Save Game", 353);
+    DrawButton("Back to Menu", 478);
+    DrawButton("Exit Game", 603);
+}
 
 
 void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
@@ -81,78 +164,4 @@ void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *button
 
     DrawRectangleRec(buttons[5], RED);
     DrawText( "Return", ((SCREEN_WIDTH - MeasureText("Return", 40)) / 2) + ((RECTANGLE_WIDTH + ( 2 * LINE_THICKNESS)) /2), 603, 40, BLACK);
-}
-
-void drawGameOverScreen(GameScreen *currentScreen, int *isGameRunning, Player *player, Sound *buttonClickSound) {
-    Vector2 mousePosition = GetMousePosition();
-
-    //Restart button
-    if(CheckCollisionPointRec(mousePosition, buttons[0])) {
-        DrawRectangleLinesEx(outline[0], LINE_THICKNESS, RED);
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            PlaySound(*buttonClickSound);
-            initializePlayer(player, 6, "resources/player.png");
-            *currentScreen = GAMEPLAY;
-        }
-    }
-
-    //SaveGame button
-    if(CheckCollisionPointRec(mousePosition, buttons[1])) {
-        DrawRectangleLinesEx(outline[1], LINE_THICKNESS, RED);
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            PlaySound(*buttonClickSound);
-            *currentScreen = SAVEGAME;
-        }
-    }
-
-    //Menu button
-    if(CheckCollisionPointRec(mousePosition, buttons[2])) {
-        DrawRectangleLinesEx(outline[2], LINE_THICKNESS, RED);
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            PlaySound(*buttonClickSound);
-            *currentScreen = HOME;
-        }
-    }
-
-    //ExitGame Button
-    if(CheckCollisionPointRec(mousePosition, buttons[3])) {
-        DrawRectangleLinesEx(outline[3], LINE_THICKNESS, RED);
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            PlaySound(*buttonClickSound);
-            *isGameRunning = 0;
-        }
-    }
-
-
-    DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
-
-    DrawRectangleRec(buttons[0], BLACK);
-    DrawText("Restart Game", (SCREEN_WIDTH - MeasureText("Restart Game",40)) / 2, 228, 40, WHITE);
-
-    DrawRectangleRec(buttons[1], BLACK);
-    DrawText("Save Game", (SCREEN_WIDTH - MeasureText("Save Game",40)) / 2, 353, 40, WHITE);
-
-    DrawRectangleRec(buttons[2], BLACK);
-    DrawText("Back to menu", (SCREEN_WIDTH - MeasureText("Back to menu",40)) / 2, 478, 40, WHITE);
-
-    DrawRectangleRec(buttons[3], BLACK);
-    DrawText("Exit Game", (SCREEN_WIDTH - MeasureText("Exit Game",40)) / 2, 603, 40, WHITE);
-}
-
-void drawTitleScreen(GameScreen *currentScreen) {
-     if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP)) {
-        *currentScreen = GAMEPLAY;
-    }
-
-    DrawRectangle(0, 0,SCREEN_WIDTH, SCREEN_HEIGHT, GREEN);
-    DrawText("TITLE SCREEN", 20, 20, 40, DARKGREEN);
-    DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
-}
-
-void drawHomeScreen(GameScreen *currentScreen) {
-    if (IsKeyPressed(KEY_ENTER) || IsGestureDetected(GESTURE_TAP)) {
-        *currentScreen = TITLE;
-    }
-
-    DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
 }

@@ -12,12 +12,12 @@ int main() {
     SetTargetFPS(60);
     int framesCounter = 0;
     int isGameRunning = 1;
-    GameScreen currentScreen = HOME;
+    GameScreen currentScreen = GAMEOVER;
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
         LoadSound("resources/sounds/coin.mp3"),
-        LoadSound("resources/sounds/hit.mp3")
+        LoadSound("resources/sounds/coin.mp3")
     };
 
     Player player;
@@ -33,52 +33,45 @@ int main() {
         LoadTexture("resources/wall.png")
     };
 
-
     //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose() && isGameRunning) {
         framesCounter++;
 
         // Mechanics
-        switch(currentScreen) {
-            case GAMEPLAY:
-                if (!isMapRead) {
-                    isMapRead = readMapFile(1, mapSections);
+        if (currentScreen == GAMEPLAY) {
+            if (!isMapRead) {
+                isMapRead = readMapFile(1, mapSections);
 
-                    loadMapInto(loadedMap[0], mapSections);
-                    loadMapInto(loadedMap[1], mapSections);
-                    break;
-                }
+                loadMapInto(loadedMap[0], mapSections);
+                loadMapInto(loadedMap[1], mapSections);
+            }
 
-                if(player.lives <= 0 || IsKeyPressed(KEY_G)) {
-                    currentScreen = GAMEOVER;
-                }
+            if(player.lives <= 0 || IsKeyPressed(KEY_G)) {
+                currentScreen = GAMEOVER;
+            }
 
-                moveMap(levelSpeed, loadedMap);
+            moveMap(levelSpeed, loadedMap);
 
-                // Checks if a new sections needs to be loaded
-                if (framesCounter % (int)(1 / levelSpeed * SECTION_WIDTH) == 0) {
-                    loadMapInto(loadedMap[1], mapSections);
-                }
+            // Checks if a new sections needs to be loaded
+            if (framesCounter % (int)(1 / levelSpeed * SECTION_WIDTH) == 0) {
+                loadMapInto(loadedMap[1], mapSections);
+            }
 
-                if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
-                    player.isInvulnerable = 0;
-                }
+            if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
+                player.isInvulnerable = 0;
+            }
 
-                if (!player.isTouchingTheGround) {
-                    movePlayer(&player, GRAVITY);
-                }
+            if (!player.isTouchingTheGround) {
+                movePlayer(&player, GRAVITY);
+            }
 
-                if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
-                    player.isTouchingTheGround = 0;
-                    movePlayer(&player, player.jumpPower);
-                }
+            if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
+                player.isTouchingTheGround = 0;
+                movePlayer(&player, player.jumpPower);
+            }
 
-                checksCollision(&player, loadedMap[0], &sounds);
-
-                break;
-
-            default: break;
+            checksCollision(&player, loadedMap[0], &sounds);
         }
 
         // Draw
@@ -87,13 +80,8 @@ int main() {
 
         switch(currentScreen) {
             case HOME:
-                drawHomeScreen(&currentScreen);
+                drawHomeScreen(&currentScreen, &sounds.button);
                 break;
-
-            case TITLE:
-                drawTitleScreen(&currentScreen);
-                break;
-
 
             case GAMEPLAY:
                 if (isMapRead) {
@@ -128,6 +116,7 @@ int main() {
     UnloadTexture(player.texture);
     UnloadSound(sounds.button);
     UnloadSound(sounds.coin);
+    UnloadSound(sounds.hit);
 
     CloseWindow();
 
