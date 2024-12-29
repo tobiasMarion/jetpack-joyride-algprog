@@ -4,14 +4,6 @@
 #include "utils.c"
 #include "raylib.h"
 
-#define MAX_PATH_SIZE 30
-#define MAP_HEIGHT 12
-#define MAP_WIDTH 240
-#define SECTION_WIDTH 30
-#define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
-#define CELL_SIZE 64
-#define SAVE_FILE_NAME "save.bin"
-
 // This value is used to draw the map more fluidly
 float offsetX = 0;
 
