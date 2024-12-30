@@ -12,16 +12,15 @@ int main() {
     SetTargetFPS(60);
     int framesCounter = 0;
     int isGameRunning = 1;
-    GameScreen currentScreen = GAMEOVER;
+    GameScreen currentScreen = HOME;
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
         LoadSound("resources/sounds/coin.mp3"),
-        LoadSound("resources/sounds/coin.mp3")
+        LoadSound("resources/sounds/hit.mp3")
     };
 
     Player player;
-    initializePlayer(&player, 6, "resources/player.png");
 
     int isMapRead = 0;
     float levelSpeed = 0.2;
@@ -80,7 +79,7 @@ int main() {
 
         switch(currentScreen) {
             case HOME:
-                drawHomeScreen(&currentScreen, &sounds.button);
+                drawHomeScreen(&isGameRunning, &currentScreen, &player, &sounds.button);
                 break;
 
             case GAMEPLAY:
@@ -94,7 +93,7 @@ int main() {
                 break;
 
             case GAMEOVER:
-                drawGameOverScreen(&currentScreen, &isGameRunning, &player, &sounds.button);
+                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &sounds.button);
                 break;
 
             case SAVEGAME:

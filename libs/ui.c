@@ -27,10 +27,10 @@ Rectangle outline[] = {
 Rectangle outlineTextBox = {((SCREEN_WIDTH - 700 ) / 2) - 5  , 400 - 5, 710, 95};
 Rectangle textBox = {(SCREEN_WIDTH - 700 ) / 2 , 400, 700, 85};
 
-void DrawButton(char label[], int y) {
+// Receiveing an callback to execute on click would make it much verbose
+int createButton(char label[], int x, int y, int shortcut, Color color, Sound *sound) {
     Rectangle button = {
-        BUTTON_POSITION_X_CENTER,
-        y,
+        x, y,
         BUTTON_WIDTH,
         BUTTON_HEIGHT,
     };
@@ -40,7 +40,7 @@ void DrawButton(char label[], int y) {
 
     if (isHovering) {
         DrawRectangle(
-            BUTTON_POSITION_X_CENTER - LINE_THICKNESS,
+            x - LINE_THICKNESS,
             y - LINE_THICKNESS,
             BUTTON_WIDTH + 2 * LINE_THICKNESS,
             BUTTON_HEIGHT + 2 * LINE_THICKNESS,
@@ -48,66 +48,61 @@ void DrawButton(char label[], int y) {
         );
     }
 
-    int labelX = BUTTON_POSITION_X_CENTER + (BUTTON_WIDTH - MeasureText(label, BUTTON_LABEL_SIZE)) / 2;
+    int labelX = x + (BUTTON_WIDTH - MeasureText(label, BUTTON_LABEL_SIZE)) / 2;
     int labelY = y + (BUTTON_HEIGHT - BUTTON_LABEL_SIZE) / 2;
 
 
-    DrawRectangleRec(button, BLACK);
+    DrawRectangleRec(button, color);
     DrawText(label, labelX, labelY, BUTTON_LABEL_SIZE, isHovering ? RED : WHITE);
+
+    if ((isHovering && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) || IsKeyPressed(shortcut)) {
+        PlaySound(*sound);
+        return 1;
+    }
+
+    return 0;
 }
 
 
-void drawHomeScreen(GameScreen *currentScreen, Sound *buttonSoundClick) {
-    Rectangle playRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 200, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
-    Rectangle highscoresRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 325, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
-    Rectangle exitRectangle1 = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 450, RECTANGLE_WIDTH, RECTANGLE_HEIGHT };
-    Rectangle restartRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 200, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
-    Rectangle saveRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 325, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
-    Rectangle menuRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 450, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
-    Rectangle exitRectangle = { (SCREEN_WIDTH - RECTANGLE_WIDTH) / 2, 575, RECTANGLE_WIDTH, RECTANGLE_HEIGHT};
-    int selectedOption = 0; // O menu começa com "Play" selecionado
-    int selectedOption2 = 0; // O menu começa com "Restart Game" selecionado
-    Color playColor = WHITE;
-    Color highscoresColor = WHITE;
-    Color exitColor = WHITE;
-    Color exitColor2 = WHITE;
-    Color backMenuColor = WHITE;
-    Color saveColor = WHITE;
-    Color restartColor = WHITE;
+void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+    int buttonX = BUTTON_POSITION_X_CENTER;
+    DrawText("Jetpack Joyride",  (SCREEN_WIDTH - MeasureText("Jetpack Joyride", 100)) / 2 , 80, 100, RED);
 
-
-    if (selectedOption == 0) {
-        PlaySound(*buttonSoundClick);
-        playColor = RED;
-        highscoresColor = WHITE;
-        exitColor = WHITE;
-    } else if (selectedOption == 1) {
-        PlaySound(*buttonSoundClick);
-        playColor = WHITE;
-        highscoresColor = RED;
-        exitColor = WHITE;
-    } else if (selectedOption == 2) {
-        PlaySound(*buttonSoundClick);
-        playColor = WHITE;
-        highscoresColor = WHITE;
-        exitColor = RED;
+    if (createButton("Play", buttonX, 225, KEY_R, BLACK, buttonClickSound)) {
+        initializePlayer(player, 6, "resources/player.png");
+        *currentScreen = GAMEPLAY;
     }
 
-    if (IsKeyPressed(KEY_DOWN)) {
-        selectedOption = (selectedOption + 1) % 3;
-    } else if (IsKeyPressed(KEY_UP)) {
-        selectedOption = (selectedOption + 2) % 3;
+    if (createButton("Highscores", buttonX, 350, KEY_S, BLACK, buttonClickSound)) {
+        *currentScreen = SAVEGAME;
+    }
+
+    if (createButton("Exit Game", buttonX, 475, KEY_E, BLACK, buttonClickSound)) {
+        *isGameRunning = 0;
     }
 }
 
 
-void drawGameOverScreen() {
+void drawGameOverScreen( int *isGameRunning, GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+    int buttonX = BUTTON_POSITION_X_CENTER;
     DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
 
-    DrawButton("Restart Game", 228);
-    DrawButton("Save Game", 353);
-    DrawButton("Back to Menu", 478);
-    DrawButton("Exit Game", 603);
+    if (createButton("Restart Game", buttonX, 225, KEY_R, BLACK, buttonClickSound)) {
+        initializePlayer(player, 6, "resources/player.png");
+        *currentScreen = GAMEPLAY;
+    }
+
+    if (createButton("Save Game", buttonX, 350, KEY_S, BLACK, buttonClickSound)) {
+        *currentScreen = SAVEGAME;
+    }
+
+    if (createButton("Back to Menu", buttonX, 475, KEY_M, BLACK, buttonClickSound)) {
+        *currentScreen = HOME;
+    }
+
+    if (createButton("Exit Game", buttonX, 600, KEY_E, BLACK, buttonClickSound)) {
+        *isGameRunning = 0;
+    }
 }
 
 
