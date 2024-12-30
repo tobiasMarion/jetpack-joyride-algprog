@@ -4,8 +4,6 @@
 #include "utils.c"
 #include "raylib.h"
 
-// This value is used to draw the map more fluidly
-float offsetX = 0;
 
 typedef struct MapTextures {
     Texture2D coinTexture;
@@ -14,6 +12,25 @@ typedef struct MapTextures {
 } MapTextures;
 
 typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
+
+
+// This value is used to draw the map more fluidly
+float offsetX = 0;
+
+MapSection emptyMap = { "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" };
+
+
 
 int isValidChar(char c) {
     char validChars[] = "XCZ ";
@@ -79,7 +96,15 @@ void printMapSection(MapSection section) {
     printf("\n\n");
 }
 
-void loadMapInto(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
+void loadEmptyMap(MapSection map) {
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        for (int j = 0; j < SECTION_WIDTH; j++) {
+            map[i][j] = emptyMap[i][j];
+        }
+    }
+}
+
+void loadMapRandomly(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
     int randomSection = getRandIntBetween(0, TOTAL_SECTIONS);
 
     for (int i = 0; i < MAP_HEIGHT; i++) {

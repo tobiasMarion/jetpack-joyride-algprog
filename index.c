@@ -42,8 +42,8 @@ int main() {
             if (!isMapRead) {
                 isMapRead = readMapFile(1, mapSections);
 
-                loadMapInto(loadedMap[0], mapSections);
-                loadMapInto(loadedMap[1], mapSections);
+                loadEmptyMap(loadedMap[0]);
+                loadMapRandomly(loadedMap[1], mapSections);
             }
 
             if(player.lives <= 0 || IsKeyPressed(KEY_G)) {
@@ -54,7 +54,7 @@ int main() {
 
             // Checks if a new sections needs to be loaded
             if (framesCounter % (int)(1 / levelSpeed * SECTION_WIDTH) == 0) {
-                loadMapInto(loadedMap[1], mapSections);
+                loadMapRandomly(loadedMap[1], mapSections);
             }
 
             if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
