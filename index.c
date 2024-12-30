@@ -84,7 +84,7 @@ int main() {
 
             case GAMEPLAY:
                 if (isMapRead) {
-                    DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED );
+                    DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &mapTextures);
                     drawPlayer(&player);
