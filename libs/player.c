@@ -1,11 +1,6 @@
 #include "raylib.h"
 #include <math.h>
-#define INITIAL_X_POSITION 6
-#define INITIAL_JUMP_POWER -1.2
-#define MIN_Y_SPEED -10
-#define MAX_Y_SPEED 15
-#define INVULNERABLE_AFTER_HIT_DURATION 1;
-#define MAX_INPUT_CHARS 15
+
 
 typedef struct Sounds {
     Sound button;
@@ -28,7 +23,7 @@ typedef struct Player {
 
 } Player;
 
-void initializePlayer(Player *player, char textureName[], float startYPosition) {
+void initializePlayer(Player *player, float startYPosition, char textureName[]) {
     player->gridX = INITIAL_X_POSITION;
     player->jumpPower = INITIAL_JUMP_POWER;
     player->texture = LoadTexture(textureName);
@@ -40,7 +35,6 @@ void initializePlayer(Player *player, char textureName[], float startYPosition) 
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
     player->name[0] = '\0';
-
 }
 
 void movePlayer(Player *player, float speedToAdd) {
@@ -63,9 +57,8 @@ void drawPlayer(Player *player) {
 }
 
 int checksCollision(Player *player, MapSection map, Sounds *sounds) {
-    int y = (int)player->positionY / CELL_SIZE;
+    int y = (int)(player->positionY / CELL_SIZE);
     int x = round(INITIAL_X_POSITION + offsetX);
-    printf("[%.3d][%.3d]\n", x, y);
 
     if (player->speedY < 0 && map[y][x] == 'X') {
         player->speedY = 0;
@@ -96,7 +89,7 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         PlaySound(sounds->coin);
     }
 
-    if (map[y+1][x] == 'Z') {
+    if (map[y][x] == 'Z') {
         player->lives -= 1;
         player->isInvulnerable = 1;
         player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
@@ -106,7 +99,6 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
     }
 
     if (map[y][x+1] == 'X') {
-        printf("[%d][%d]\n", x, y);
         player->lives -= 1;
         player->isInvulnerable = 1;
         player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
