@@ -136,13 +136,17 @@ void moveMapMatrix(MapSection loadedSections[2]) {
     }
 }
 
-void moveMap(float speed, MapSection loadedSections[2]) {
+int moveMap(float speed, MapSection loadedSections[2]) {
     offsetX += speed;
 
-    if (offsetX > 1) {
-        moveMapMatrix(loadedSections);
-        offsetX--;
+    if (offsetX < 1) {
+        return 0;
     }
+
+    moveMapMatrix(loadedSections);
+    offsetX--;
+
+    return 1;
 }
 
 void drawCell(char c, int coordX, int coordY, MapTextures *mapTextures) {
@@ -191,6 +195,7 @@ int loadLevel(int levelNumber, Level *level) {
     int isMapRead = readMapFile(levelNumber, level->mapSections);
 
     if (!isMapRead) {
+        printf("ERROR: Error on load level %d \n", levelNumber);
         return 0;
     }
 
@@ -212,6 +217,8 @@ int loadLevel(int levelNumber, Level *level) {
 
     level->speed = levelNumber * LEVEL_SPEED_MULTIPLIER;
     level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
+
+    printf("Level %d loaded successfully \n", levelNumber);
 
     return 1;
 }

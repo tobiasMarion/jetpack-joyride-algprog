@@ -22,7 +22,7 @@ int main() {
 
     Player player;
     Level level = {0};
-    int currentLevel = 1;
+    int currentLevel = 0;
     int isLevelLoaded = 0;
 
     MapSection loadedMap[2] = {0};
@@ -35,7 +35,8 @@ int main() {
         // Mechanics
         if (currentScreen == GAMEPLAY) {
             if (!isLevelLoaded) {
-                isLevelLoaded = loadLevel(currentLevel, &level);
+                isLevelLoaded = loadLevel(currentLevel + 1, &level);
+                currentLevel += isLevelLoaded;
 
                 loadEmptyMap(loadedMap[0]);
                 loadMapRandomly(loadedMap[1], level.mapSections);
@@ -45,7 +46,7 @@ int main() {
                 currentScreen = GAMEOVER;
             }
 
-            moveMap(level.speed, loadedMap);
+            player.distance += moveMap(level.speed, loadedMap);
 
             // Checks if a new sections needs to be loaded
             if (framesCounter % (int)(1 / level.speed * SECTION_WIDTH) == 0) {
@@ -66,6 +67,10 @@ int main() {
             }
 
             checksCollision(&player, loadedMap[0], &sounds);
+
+            if (player.distance > level.requiredDistanceToNextLevel) {
+                isLevelLoaded = 0;
+            }
         }
 
         // Draw

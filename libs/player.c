@@ -12,6 +12,7 @@ typedef struct Player {
     int gridX;
     int coins;
     int lives;
+    int distance;
     int isTouchingTheGround;
     int isInvulnerable;
     float invulnerableUntill;
@@ -32,6 +33,7 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->isTouchingTheGround = 0;
     player->lives = 3;
     player->coins = 0;
+    player->distance = 0;
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
     player->name[0] = '\0';
