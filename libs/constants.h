@@ -10,12 +10,17 @@
 
 
 // Map
-#define MAX_PATH_SIZE 30
+#define MAX_PATH_SIZE 64
 #define MAP_HEIGHT 12
 #define MAP_WIDTH 240
 #define SECTION_WIDTH 30
 #define TOTAL_SECTIONS MAP_WIDTH / SECTION_WIDTH
 #define CELL_SIZE 64
+
+// Levels
+#define AMOUNT_OF_LEVELS 3
+#define LEVEL_SPEED_MULTIPLIER 0.2
+#define INITIAL_GRAVITY 0.6
 
 
 // Screen

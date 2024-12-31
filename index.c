@@ -21,16 +21,11 @@ int main() {
     };
 
     Player player;
+    Level level = {0};
+    int currentLevel = 1;
+    int isLevelLoaded = 0;
 
-    int isMapRead = 0;
-    float levelSpeed = 0.2;
     MapSection loadedMap[2] = {0};
-    MapSection mapSections[TOTAL_SECTIONS] = {0};
-    MapTextures mapTextures = {
-        LoadTexture("resources/coin.png"),
-        LoadTexture("resources/spike.png"),
-        LoadTexture("resources/wall.png")
-    };
 
     //--------------------------------------------------------------------------------------
 
@@ -39,22 +34,22 @@ int main() {
 
         // Mechanics
         if (currentScreen == GAMEPLAY) {
-            if (!isMapRead) {
-                isMapRead = readMapFile(1, mapSections);
+            if (!isLevelLoaded) {
+                isLevelLoaded = loadLevel(currentLevel, &level);
 
                 loadEmptyMap(loadedMap[0]);
-                loadMapRandomly(loadedMap[1], mapSections);
+                loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
             if(player.lives <= 0 || IsKeyPressed(KEY_G)) {
                 currentScreen = GAMEOVER;
             }
 
-            moveMap(levelSpeed, loadedMap);
+            moveMap(level.speed, loadedMap);
 
             // Checks if a new sections needs to be loaded
-            if (framesCounter % (int)(1 / levelSpeed * SECTION_WIDTH) == 0) {
-                loadMapRandomly(loadedMap[1], mapSections);
+            if (framesCounter % (int)(1 / level.speed * SECTION_WIDTH) == 0) {
+                loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
             if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
@@ -62,7 +57,7 @@ int main() {
             }
 
             if (!player.isTouchingTheGround) {
-                movePlayer(&player, GRAVITY);
+                movePlayer(&player, level.gravity);
             }
 
             if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
@@ -83,10 +78,10 @@ int main() {
                 break;
 
             case GAMEPLAY:
-                if (isMapRead) {
+                if (isLevelLoaded) {
                     DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
-                    drawMap(loadedMap, &mapTextures);
+                    drawMap(loadedMap, &level.mapTextures);
                     drawPlayer(&player);
                 }
 
@@ -109,9 +104,7 @@ int main() {
 
 
     // De-Initialization
-    UnloadTexture(mapTextures.coinTexture);
-    UnloadTexture(mapTextures.spikeTexture);
-    UnloadTexture(mapTextures.wallTexture);
+    unloadMapTextures(&level.mapTextures);
     UnloadTexture(player.texture);
     UnloadSound(sounds.button);
     UnloadSound(sounds.coin);

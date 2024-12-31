@@ -4,6 +4,7 @@
 #include "utils.c"
 #include "raylib.h"
 
+typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
 
 typedef struct MapTextures {
     Texture2D coinTexture;
@@ -11,7 +12,13 @@ typedef struct MapTextures {
     Texture2D wallTexture;
 } MapTextures;
 
-typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
+typedef struct Level {
+    int requiredDistanceToNextLevel;
+    float speed;
+    float gravity;
+    MapSection mapSections[TOTAL_SECTIONS];
+    MapTextures mapTextures;
+} Level;
 
 
 // This value is used to draw the map more fluidly
@@ -29,7 +36,6 @@ MapSection emptyMap = { "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
                         "                              ",
                         "                              ",
                         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" };
-
 
 
 int isValidChar(char c) {
@@ -105,7 +111,7 @@ void loadEmptyMap(MapSection map) {
 }
 
 void loadMapRandomly(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
-    int randomSection = getRandIntBetween(0, TOTAL_SECTIONS);
+    int randomSection = getRandIntBetween(0, TOTAL_SECTIONS - 1);
 
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH; j++) {
@@ -179,4 +185,41 @@ void drawMap(MapSection loadedMap[2], MapTextures *mapTextures) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         drawCell(loadedMap[1][i][0], SECTION_WIDTH, i, mapTextures);
     }
+}
+
+int loadLevel(int levelNumber, Level *level) {
+    int isMapRead = readMapFile(levelNumber, level->mapSections);
+
+    if (!isMapRead) {
+        return 0;
+    }
+
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 100 * levelNumber;
+
+    char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
+
+    snprintf(coinPath,  MAX_PATH_SIZE, "./resources/levels/%d/coin.png",   levelNumber);
+    snprintf(spikePath, MAX_PATH_SIZE, "./resources/levels/%d/spike.png",  levelNumber);
+    snprintf(wallPath,  MAX_PATH_SIZE, "./resources/levels/%d/wall.png",   levelNumber);
+
+    MapTextures textures = {
+        LoadTexture(coinPath),
+        LoadTexture(spikePath),
+        LoadTexture(wallPath)
+    };
+
+    level->mapTextures = textures;
+
+    level->speed = levelNumber * LEVEL_SPEED_MULTIPLIER;
+    level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
+
+    return 1;
+}
+
+void unloadMapTextures(MapTextures *mapTextures) {
+    UnloadTexture(mapTextures->coinTexture);
+    UnloadTexture(mapTextures->spikeTexture);
+    UnloadTexture(mapTextures->wallTexture);
+
+    return;
 }
