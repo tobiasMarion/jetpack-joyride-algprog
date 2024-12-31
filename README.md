@@ -4,11 +4,13 @@ Trabalho final desenvoldido para a disciplina de Algoritmos e Programação na U
 
 ## Lista de Tarefas
 
-- [ ] Telas (Bem vindo, jogo, pausa, final, salvar record)
-- [ ] Assets (imagens, ícones, sons)
-- [ ] Desenhar e Mapa Carregar o mapa (12x30, 12x240)
-- [ ] Personagem (mecanicas de voar, gravidade, colisão)
-- [ ] HUD (Contador Moedas e Pontuação)
+- [x] Telas (Bem vindo, jogo, pausa, final, salvar record)
+- [x] Assets (imagens, ícones, sons)
+- [x] Desenhar e Mapa Carregar o mapa (12x30, 12x240)
+- [x] Personagem (mecanicas de voar, gravidade, colisão)
+- [x] HUD (Contador Moedas e Pontuação)
+- [ ] Lasers
 - [ ] Cheats
-- [ ] PowerUps
-- [ ] Inimigos
+- [ ] Progresso de Nível
+- [ ] Salvar e carregar pontuações
+
