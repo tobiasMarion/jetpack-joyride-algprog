@@ -61,6 +61,8 @@ void drawPlayer(Player *player) {
 int checksCollision(Player *player, MapSection map, Sounds *sounds) {
     int y = (int)(player->positionY / CELL_SIZE);
     int x = round(INITIAL_X_POSITION + offsetX);
+    float decimalPartY = player->positionY - y;
+
 
     if (player->speedY < 0 && map[y][x] == 'X') {
         player->speedY = 0;
@@ -99,6 +101,25 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
 
         return 1;
     }
+
+    if (map[y][x] == 'Z') {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+
+        return 1;
+    }
+
+    if (decimalPartY > 0.7 && map[y+1][x] == 'Z') {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+
+        return 1;
+    }
+
 
     if (map[y][x+1] == 'X') {
         player->lives -= 1;

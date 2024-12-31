@@ -2,7 +2,7 @@
 #include "string.h"
 #include "./constants.h"
 
-typedef enum GameScreen { HOME, GAMEPLAY, ERROR, GAMEOVER, ENDGAME, SAVEGAME} GameScreen;
+typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR } GameScreen;
 
 // Receiveing an callback to execute on click would make it much verbose
 int createButton(char label[], int x, int y, int shortcut, Color color, Color hoverColor, Sound *sound) {
@@ -152,4 +152,21 @@ void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *button
     if (createButton("Return", returnButtonX, buttonsY, -1, BLACK, RED, buttonClickSound)) {
         *currentScreen = GAMEOVER;
     }
+}
+
+
+void drawNextLevelScreen(int n, Level *level, GameScreen *currentScreen) {
+    int dt = GetTime() - level->startedAt;
+
+    if (dt > 1) {
+        *currentScreen = GAMEPLAY;
+        return;
+    }
+
+    DrawText(TextFormat("Level %d", n), (SCREEN_WIDTH - MeasureText("Level 0", 100)) / 2, 80, 100, GREEN);
+    DrawText(
+         TextFormat("Faster, Heavier... Harder", n),
+         (SCREEN_WIDTH - MeasureText("Faster, Heavier... Harder", 40)) / 2,
+         240, 40, BLACK
+    );
 }

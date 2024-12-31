@@ -15,6 +15,7 @@ typedef struct MapTextures {
 typedef struct Level {
     int requiredDistanceToNextLevel;
     float speed;
+    int startedAt;
     float gravity;
     MapSection mapSections[TOTAL_SECTIONS];
     MapTextures mapTextures;
@@ -193,13 +194,14 @@ void drawMap(MapSection loadedMap[2], MapTextures *mapTextures) {
 
 int loadLevel(int levelNumber, Level *level) {
     int isMapRead = readMapFile(levelNumber, level->mapSections);
+    level->startedAt = GetTime();
 
     if (!isMapRead) {
         printf("ERROR: Error on load level %d \n", levelNumber);
         return 0;
     }
 
-    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 100 * levelNumber;
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 500 * levelNumber;
 
     char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
 
@@ -215,7 +217,7 @@ int loadLevel(int levelNumber, Level *level) {
 
     level->mapTextures = textures;
 
-    level->speed = levelNumber * LEVEL_SPEED_MULTIPLIER;
+    level->speed = 0.2 + (levelNumber - 1) * LEVEL_SPEED_MULTIPLIER;
     level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
 
     printf("Level %d loaded successfully \n", levelNumber);

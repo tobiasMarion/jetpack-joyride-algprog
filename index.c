@@ -69,7 +69,13 @@ int main() {
             checksCollision(&player, loadedMap[0], &sounds);
 
             if (player.distance > level.requiredDistanceToNextLevel) {
-                isLevelLoaded = 0;
+                currentLevel++;
+                currentScreen = NEXT_LEVEL;
+                unloadMapTextures(&level.mapTextures);
+                isLevelLoaded = loadLevel(currentLevel, &level);
+
+                loadEmptyMap(loadedMap[0]);
+                loadMapRandomly(loadedMap[1], level.mapSections);
             }
         }
 
@@ -90,6 +96,10 @@ int main() {
                     drawPlayer(&player);
                 }
 
+                break;
+
+            case NEXT_LEVEL:
+                drawNextLevelScreen(currentLevel, &level, &currentScreen);
                 break;
 
             case GAMEOVER:
