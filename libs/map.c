@@ -4,8 +4,7 @@
 #include "utils.c"
 #include "raylib.h"
 
-// This value is used to draw the map more fluidly
-float offsetX = 0;
+typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
 
 typedef struct MapTextures {
     Texture2D coinTexture;
@@ -13,7 +12,32 @@ typedef struct MapTextures {
     Texture2D wallTexture;
 } MapTextures;
 
-typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
+typedef struct Level {
+    int requiredDistanceToNextLevel;
+    float speed;
+    int startedAt;
+    float gravity;
+    MapSection mapSections[TOTAL_SECTIONS];
+    MapTextures mapTextures;
+} Level;
+
+
+// This value is used to draw the map more fluidly
+float offsetX = 0;
+
+MapSection emptyMap = { "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "                              ",
+                        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" };
+
 
 int isValidChar(char c) {
     char validChars[] = "XCZ ";
@@ -79,8 +103,16 @@ void printMapSection(MapSection section) {
     printf("\n\n");
 }
 
-void loadMapInto(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
-    int randomSection = getRandIntBetween(0, TOTAL_SECTIONS);
+void loadEmptyMap(MapSection map) {
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        for (int j = 0; j < SECTION_WIDTH; j++) {
+            map[i][j] = emptyMap[i][j];
+        }
+    }
+}
+
+void loadMapRandomly(MapSection map, MapSection mapSections[TOTAL_SECTIONS]) {
+    int randomSection = getRandIntBetween(0, TOTAL_SECTIONS - 1);
 
     for (int i = 0; i < MAP_HEIGHT; i++) {
         for (int j = 0; j < SECTION_WIDTH; j++) {
@@ -105,13 +137,17 @@ void moveMapMatrix(MapSection loadedSections[2]) {
     }
 }
 
-void moveMap(float speed, MapSection loadedSections[2]) {
+int moveMap(float speed, MapSection loadedSections[2]) {
     offsetX += speed;
 
-    if (offsetX > 1) {
-        moveMapMatrix(loadedSections);
-        offsetX--;
+    if (offsetX < 1) {
+        return 0;
     }
+
+    moveMapMatrix(loadedSections);
+    offsetX--;
+
+    return 1;
 }
 
 void drawCell(char c, int coordX, int coordY, MapTextures *mapTextures) {
@@ -154,4 +190,46 @@ void drawMap(MapSection loadedMap[2], MapTextures *mapTextures) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         drawCell(loadedMap[1][i][0], SECTION_WIDTH, i, mapTextures);
     }
+}
+
+int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LENGTH]) {
+    int isMapRead = readMapFile(levelNumber, level->mapSections);
+    level->startedAt = GetTime();
+
+    if (!isMapRead) {
+        snprintf(errorMessage, ERROR_MESSAGE_LENGTH, "ERROR: Error on load level %d \n", levelNumber);
+        printf(errorMessage);
+        return 0;
+    }
+
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 100 * levelNumber;
+
+    char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
+
+    snprintf(coinPath,  MAX_PATH_SIZE, "./resources/levels/%d/coin.png",   levelNumber);
+    snprintf(spikePath, MAX_PATH_SIZE, "./resources/levels/%d/spike.png",  levelNumber);
+    snprintf(wallPath,  MAX_PATH_SIZE, "./resources/levels/%d/wall.png",   levelNumber);
+
+    MapTextures textures = {
+        LoadTexture(coinPath),
+        LoadTexture(spikePath),
+        LoadTexture(wallPath)
+    };
+
+    level->mapTextures = textures;
+
+    level->speed = 0.2 + (levelNumber - 1) * LEVEL_SPEED_MULTIPLIER;
+    level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
+
+    printf("Level %d loaded successfully \n", levelNumber);
+
+    return 1;
+}
+
+void unloadMapTextures(MapTextures *mapTextures) {
+    UnloadTexture(mapTextures->coinTexture);
+    UnloadTexture(mapTextures->spikeTexture);
+    UnloadTexture(mapTextures->wallTexture);
+
+    return;
 }
