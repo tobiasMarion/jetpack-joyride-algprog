@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include <math.h>
 
-
 typedef struct Sounds {
     Sound button;
     Sound coin;

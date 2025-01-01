@@ -13,6 +13,7 @@ int main() {
     int framesCounter = 0;
     int isGameRunning = 1;
     GameScreen currentScreen = HOME;
+    char errorMessage[ERROR_MESSAGE_LENGTH] = {0};
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
@@ -22,7 +23,8 @@ int main() {
 
     Player player;
     Level level = {0};
-    int currentLevel = 0;
+    double upLevelAt = 0;
+    int currentLevel = 1;
     int isLevelLoaded = 0;
 
     MapSection loadedMap[2] = {0};
@@ -35,8 +37,11 @@ int main() {
         // Mechanics
         if (currentScreen == GAMEPLAY) {
             if (!isLevelLoaded) {
-                isLevelLoaded = loadLevel(currentLevel + 1, &level);
-                currentLevel += isLevelLoaded;
+                isLevelLoaded = loadLevel(currentLevel, &level, errorMessage);
+
+                if (!isLevelLoaded) {
+                    currentScreen = ERROR;
+                }
 
                 loadEmptyMap(loadedMap[0]);
                 loadMapRandomly(loadedMap[1], level.mapSections);
@@ -68,14 +73,12 @@ int main() {
 
             checksCollision(&player, loadedMap[0], &sounds);
 
-            if (player.distance > level.requiredDistanceToNextLevel) {
+            if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {
                 currentLevel++;
+                upLevelAt = GetTime();
+                isLevelLoaded = 0;
                 currentScreen = NEXT_LEVEL;
                 unloadMapTextures(&level.mapTextures);
-                isLevelLoaded = loadLevel(currentLevel, &level);
-
-                loadEmptyMap(loadedMap[0]);
-                loadMapRandomly(loadedMap[1], level.mapSections);
             }
         }
 
@@ -99,16 +102,19 @@ int main() {
                 break;
 
             case NEXT_LEVEL:
-                drawNextLevelScreen(currentLevel, &level, &currentScreen);
+                drawNextLevelScreen(currentLevel, upLevelAt, &currentScreen);
                 break;
 
             case GAMEOVER:
-                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &sounds.button);
+                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &currentLevel, &isLevelLoaded, &sounds.button);
                 break;
 
             case SAVEGAME:
                 drawSaveGameScreen(&currentScreen, &player, &sounds.button);
                 break;
+
+            case ERROR:
+                drawErrorScreen(&isGameRunning, errorMessage);
 
             default: break;
         }

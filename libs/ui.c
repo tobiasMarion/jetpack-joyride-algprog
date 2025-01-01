@@ -1,8 +1,9 @@
 #include "raylib.h"
 #include "string.h"
-#include "./constants.h"
+#include "constants.h"
 
 typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR } GameScreen;
+
 
 // Receiveing an callback to execute on click would make it much verbose
 int createButton(char label[], int x, int y, int shortcut, Color color, Color hoverColor, Sound *sound) {
@@ -110,13 +111,22 @@ void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *playe
 }
 
 
-void drawGameOverScreen( int *isGameRunning, GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+void drawGameOverScreen(
+    int *isGameRunning,
+    GameScreen *currentScreen,
+    Player *player,
+    int *currentLevel,
+    int *isLevelLoaded,
+    Sound *buttonClickSound
+) {
     int buttonX = BUTTON_POSITION_X_CENTER;
     DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
 
     if (createButton("Restart Game", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
         *currentScreen = GAMEPLAY;
+        *currentLevel = 0;
+        *isLevelLoaded = 0;
     }
 
     if (createButton("Save Game", buttonX, 350, KEY_S, BLACK, RED, buttonClickSound)) {
@@ -155,8 +165,8 @@ void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *button
 }
 
 
-void drawNextLevelScreen(int n, Level *level, GameScreen *currentScreen) {
-    int dt = GetTime() - level->startedAt;
+void drawNextLevelScreen(int n, double upLevelAt, GameScreen *currentScreen) {
+    double dt = GetTime() - upLevelAt;
 
     if (dt > 1) {
         *currentScreen = GAMEPLAY;
@@ -168,5 +178,22 @@ void drawNextLevelScreen(int n, Level *level, GameScreen *currentScreen) {
          TextFormat("Faster, Heavier... Harder", n),
          (SCREEN_WIDTH - MeasureText("Faster, Heavier... Harder", 40)) / 2,
          240, 40, BLACK
+    );
+}
+
+
+void drawErrorScreen(int *isGameRunning, char errorMessage[ERROR_MESSAGE_LENGTH]) {
+    ClearBackground(RED);
+
+    DrawText(
+        "ERROR",
+        (SCREEN_WIDTH - MeasureText("ERROR", 100)) / 2,
+        80, 100, WHITE
+    );
+
+    DrawText(
+        errorMessage,
+        (SCREEN_WIDTH - MeasureText(errorMessage, 60)) / 2,
+        256, 60, WHITE
     );
 }

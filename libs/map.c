@@ -192,16 +192,17 @@ void drawMap(MapSection loadedMap[2], MapTextures *mapTextures) {
     }
 }
 
-int loadLevel(int levelNumber, Level *level) {
+int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LENGTH]) {
     int isMapRead = readMapFile(levelNumber, level->mapSections);
     level->startedAt = GetTime();
 
     if (!isMapRead) {
-        printf("ERROR: Error on load level %d \n", levelNumber);
+        snprintf(errorMessage, ERROR_MESSAGE_LENGTH, "ERROR: Error on load level %d \n", levelNumber);
+        printf(errorMessage);
         return 0;
     }
 
-    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 500 * levelNumber;
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 100 * levelNumber;
 
     char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
 
