@@ -71,6 +71,7 @@ int main() {
                 movePlayer(&player, player.jumpPower);
             }
 
+            checkInvincibilityWord(&player, "WORD");
             checksCollision(&player, loadedMap[0], &sounds);
 
             if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {

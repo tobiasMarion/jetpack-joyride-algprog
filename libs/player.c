@@ -20,6 +20,8 @@ typedef struct Player {
     float speedY;
     Texture2D texture;
     char name[MAX_INPUT_CHARS + 1];
+    char inputBuffer[MAX_INPUT_CHARS + 1];
+    int inputIndex;
 
 } Player;
 
@@ -36,6 +38,8 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
     player->name[0] = '\0';
+    player->inputBuffer[0] = '\0';
+    player->inputIndex = 0;
 }
 
 void movePlayer(Player *player, float speedToAdd) {
@@ -131,3 +135,33 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
 
     return 0;
 }
+
+void checkInvincibilityWord(Player *player, const char *activationWord) {
+
+    if (IsKeyPressed(KEY_BACKSPACE) && player->inputIndex > 0) {
+        player->inputIndex--;
+        player->inputBuffer[player->inputIndex] = '\0';
+
+    } else if (IsKeyPressed(KEY_ENTER)) {
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+
+    } else {
+        for (int key = 'A'; key <= 'Z'; key++) {
+            if (IsKeyPressed(key)) {
+                if (player->inputIndex < MAX_INPUT_CHARS) {
+                    player->inputBuffer[player->inputIndex++] = (char)key;
+                    player->inputBuffer[player->inputIndex] = '\0';
+                }
+            }
+        }
+    }
+
+    if (strcmp(player->inputBuffer, activationWord) == 0) {
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + 5.0f; // 5 segundos de invulnerabilidade
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+    }
+}
+
