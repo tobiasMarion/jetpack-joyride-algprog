@@ -126,7 +126,7 @@ void drawGameOverScreen(
     if (createButton("Restart Game", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
         *currentScreen = GAMEPLAY;
-        *currentLevel = 0;
+        *currentLevel = 1;
         *isLevelLoaded = 0;
     }
 
