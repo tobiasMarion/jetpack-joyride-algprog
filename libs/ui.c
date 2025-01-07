@@ -2,6 +2,7 @@
 #include "string.h"
 #include "constants.h"
 
+
 typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR } GameScreen;
 
 
@@ -143,7 +144,7 @@ void drawGameOverScreen(
 }
 
 
-void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClickSound) {
     DrawText("Save Game menu", (SCREEN_WIDTH - MeasureText("Save Game Menu", 80)) / 2, 80, 80, BLACK );
     DrawText(TextFormat("You got %d points!"), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!"),40)) / 2, 180, 40, DARKGREEN);
 
@@ -154,9 +155,10 @@ void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *button
     int saveButtonX = (SCREEN_WIDTH - (2 * BUTTON_WIDTH + buttonsGap)) / 2;
     int returnButtonX = saveButtonX + BUTTON_WIDTH + buttonsGap;
 
-    createInputText(player->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
+    createInputText(save->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
 
     if (createButton("Save Progress", saveButtonX, buttonsY, -1, GREEN, BLACK, buttonClickSound)) {
+        printf("jogo salvo\n");
     }
 
     if (createButton("Return", returnButtonX, buttonsY, -1, BLACK, RED, buttonClickSound)) {

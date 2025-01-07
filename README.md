@@ -1,6 +1,6 @@
 # Trabalho Final Alg&Prog
- 
-Trabalho final desenvoldido para a disciplina de Algoritmos e Programação na UFRGS
+
+Trabalho final desenvolvido para a disciplina de Algoritmos e Programação na UFRGS
 
 ## Lista de Tarefas
 

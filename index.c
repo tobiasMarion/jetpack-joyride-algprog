@@ -3,6 +3,7 @@
 #include "./libs/constants.h"
 #include "./libs/map.c"
 #include "./libs/player.c"
+#include "./libs/leaderboard.c"
 #include "./libs/ui.c"
 
 int main() {
@@ -21,6 +22,9 @@ int main() {
         LoadSound("resources/sounds/hit.mp3")
     };
 
+
+    Save currentSave;
+    initializeSave(&currentSave);
     Player player;
     Level level = {0};
     double upLevelAt = 0;
@@ -28,7 +32,6 @@ int main() {
     int isLevelLoaded = 0;
 
     MapSection loadedMap[2] = {0};
-
     //--------------------------------------------------------------------------------------
 
     while (!WindowShouldClose() && isGameRunning) {
@@ -110,7 +113,8 @@ int main() {
                 break;
 
             case SAVEGAME:
-                drawSaveGameScreen(&currentScreen, &player, &sounds.button);
+                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button);
+
                 break;
 
             case ERROR:
