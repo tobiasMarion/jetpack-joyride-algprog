@@ -18,16 +18,21 @@ int main() {
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
         LoadSound("resources/sounds/coin.mp3"),
-        LoadSound("resources/sounds/hit.mp3")
+        LoadSound("resources/sounds/hit.mp3"),
+        LoadSound("resources/sounds/laser.mp3")
     };
 
     Player player;
     Level level = {0};
+
     double upLevelAt = 0;
+
     int currentLevel = 1;
     int isLevelLoaded = 0;
 
     MapSection loadedMap[2] = {0};
+    Lasers lasers = {0};
+    Texture2D laserTexture = LoadTexture("resources/laser.png");
 
     //--------------------------------------------------------------------------------------
 
@@ -58,6 +63,10 @@ int main() {
                 loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
+            if (framesCounter % (int)(1 / level.speed * SECTION_WIDTH) == 3) {
+                spawnLasers(lasers, &level);
+            }
+
             if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
                 player.isInvulnerable = 0;
             }
@@ -71,7 +80,7 @@ int main() {
                 movePlayer(&player, player.jumpPower);
             }
 
-            checksCollision(&player, loadedMap[0], &sounds);
+            checksCollision(&player, loadedMap[0], lasers, &sounds);
 
             if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {
                 currentLevel++;
@@ -79,6 +88,7 @@ int main() {
                 isLevelLoaded = 0;
                 currentScreen = NEXT_LEVEL;
                 unloadMapTextures(&level.mapTextures);
+                removeAllLasers(lasers);
             }
         }
 
@@ -96,6 +106,7 @@ int main() {
                     DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &level.mapTextures);
+                    drawLasers(lasers, &laserTexture, sounds.laser);
                     drawPlayer(&player);
                 }
 

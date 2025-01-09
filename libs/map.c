@@ -17,9 +17,12 @@ typedef struct Level {
     float speed;
     int startedAt;
     float gravity;
+    float chanceLaserSpawn;
     MapSection mapSections[TOTAL_SECTIONS];
     MapTextures mapTextures;
 } Level;
+
+typedef int Lasers[MAP_HEIGHT];
 
 
 // This value is used to draw the map more fluidly
@@ -202,7 +205,7 @@ int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LEN
         return 0;
     }
 
-    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 100 * levelNumber;
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 150 * levelNumber;
 
     char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
 
@@ -220,6 +223,7 @@ int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LEN
 
     level->speed = 0.2 + (levelNumber - 1) * LEVEL_SPEED_MULTIPLIER;
     level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
+    level->chanceLaserSpawn = (levelNumber - 1) * 0.12;
 
     printf("Level %d loaded successfully \n", levelNumber);
 
@@ -232,4 +236,58 @@ void unloadMapTextures(MapTextures *mapTextures) {
     UnloadTexture(mapTextures->wallTexture);
 
     return;
+}
+
+void spawnLasers(Lasers lasers, Level *currentLevel) {
+    if (currentLevel->chanceLaserSpawn == 0) {
+        return;
+    }
+
+    int rand = getRandIntBetween(0, 100);
+    int chance = currentLevel->chanceLaserSpawn * 100;
+    int shouldSpawn =  rand < chance;
+
+    if (!shouldSpawn) {
+        return;
+    }
+
+    int currentTime = GetTime();
+    int row = getRandIntBetween(0 + 1, MAP_HEIGHT - 2);
+    lasers[row] = currentTime;
+}
+
+void drawLasers(Lasers lasers, Texture2D *texture, Sound sound) {
+    int currentTime = GetTime();
+    int opacity;
+    float dt;
+
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        if (lasers[i] != 0 && lasers[i] + LASER_ACTIVATION_DELAY + 1 > currentTime) {
+            dt = currentTime - lasers[i];
+            opacity = dt * 255 / LASER_ACTIVATION_DELAY;
+            opacity = minMax(opacity, 0, 255);
+
+            if (opacity == 255) {
+                PlaySound(sound);
+            }
+
+            Color color = { 255, 255, 255, opacity };
+
+
+            Rectangle rect = {0, i * CELL_SIZE, SCREEN_WIDTH, CELL_SIZE};
+            Rectangle sourceRectangle = {0, 0, texture->width, texture->height};
+            Vector2 anchorPoint = {0, 0};
+
+            DrawTexturePro(*texture, sourceRectangle, rect, anchorPoint, 0, color);
+
+        } else {
+            lasers[i] = 0;
+        }
+    }
+}
+
+void removeAllLasers(Lasers lasers) {
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        lasers[i] = 0;
+    }
 }

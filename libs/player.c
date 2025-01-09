@@ -5,6 +5,7 @@ typedef struct Sounds {
     Sound button;
     Sound coin;
     Sound hit;
+    Sound laser;
 } Sounds;
 
 typedef struct Player {
@@ -57,7 +58,7 @@ void drawPlayer(Player *player) {
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, color);
 }
 
-int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sounds) {
     int y = (int)(player->positionY / CELL_SIZE);
     int x = round(INITIAL_X_POSITION + offsetX);
     float decimalPartY = player->positionY - y;
@@ -127,6 +128,17 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         PlaySound(sounds->hit);
 
         return 1;
+    }
+
+    int currentTime = GetTime();
+    int dt = currentTime - LASER_ACTIVATION_DELAY;
+    int isTouchingLaser = (lasers[y] < dt && lasers[y] != 0) || (decimalPartY > 0.7 && lasers[y+1] < dt && lasers[y+1] != 0);
+
+    if (isTouchingLaser) {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
     }
 
     return 0;
