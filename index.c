@@ -26,6 +26,9 @@ int main() {
     double upLevelAt = 0;
     int currentLevel = 1;
     int isLevelLoaded = 0;
+    float currentSpeed;
+    int isSlowMotionActive = 0;
+    float slowMotionUntil = 0;
 
     MapSection loadedMap[2] = {0};
 
@@ -51,7 +54,15 @@ int main() {
                 currentScreen = GAMEOVER;
             }
 
-            player.distance += moveMap(level.speed, loadedMap);
+            checkCheatWords(&player, "WORD", "SLOW", &slowMotionUntil, &isSlowMotionActive);
+
+            if (isSlowMotionActive) {
+                currentSpeed = level.speed * 0.5f; // Velocidade reduzida
+            } else {
+                currentSpeed = level.speed;       // Velocidade normal
+            }
+
+            player.distance += moveMap(currentSpeed, loadedMap);
 
             // Checks if a new sections needs to be loaded
             if (framesCounter % (int)(1 / level.speed * SECTION_WIDTH) == 0) {
@@ -60,6 +71,10 @@ int main() {
 
             if (player.isInvulnerable && GetTime() > player.invulnerableUntill) {
                 player.isInvulnerable = 0;
+            }
+
+            if (isSlowMotionActive && GetTime() > slowMotionUntil) {
+                isSlowMotionActive = 0;
             }
 
             if (!player.isTouchingTheGround) {
@@ -71,7 +86,6 @@ int main() {
                 movePlayer(&player, player.jumpPower);
             }
 
-            checkInvincibilityWord(&player, "WORD");
             checksCollision(&player, loadedMap[0], &sounds);
 
             if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {

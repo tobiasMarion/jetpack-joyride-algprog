@@ -136,7 +136,8 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
     return 0;
 }
 
-void checkInvincibilityWord(Player *player, const char *activationWord) {
+void checkCheatWords(Player *player, const char *activationWord1, const char *activationWord2,
+                     float *slowMotionUntil, int *isSlowMotionActive) {
 
     if (IsKeyPressed(KEY_BACKSPACE) && player->inputIndex > 0) {
         player->inputIndex--;
@@ -157,11 +158,19 @@ void checkInvincibilityWord(Player *player, const char *activationWord) {
         }
     }
 
-    if (strcmp(player->inputBuffer, activationWord) == 0) {
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + 5.0f; // 5 segundos de invulnerabilidade
+    if (strcmp(player->inputBuffer, activationWord1) == 0) {
+        player->isInvulnerable = 1; // Ativa invulnerabilidade
+        player->invulnerableUntill = GetTime() + 5.0f; // Dura 5 segundos
         player->inputIndex = 0;
         player->inputBuffer[0] = '\0';
     }
+
+    if (strcmp(player->inputBuffer, activationWord2) == 0) {
+        *isSlowMotionActive = 1; // Ativa camera lenta
+        *slowMotionUntil = GetTime() + 5.0f;  // Dura 5 segundos
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+    }
+
 }
 
