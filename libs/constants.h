@@ -1,7 +1,7 @@
 // Player
 #define INITIAL_X_POSITION 6
 #define INITIAL_JUMP_POWER -1.2
-#define MIN_Y_SPEED -10
+#define MIN_Y_SPEED -8
 #define MAX_Y_SPEED 15
 #define INVULNERABLE_AFTER_HIT_DURATION 1;
 #define MAX_INPUT_CHARS 15

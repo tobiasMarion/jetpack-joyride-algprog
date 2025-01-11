@@ -63,7 +63,7 @@ int main() {
                 loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
-            if (framesCounter % (int)(1 / level.speed * SECTION_WIDTH) == 3) {
+            if (framesCounter % ((int)(1 / level.speed * SECTION_WIDTH) * 4) == 0) {
                 spawnLasers(lasers, &level);
             }
 

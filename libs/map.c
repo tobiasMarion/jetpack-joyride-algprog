@@ -205,7 +205,7 @@ int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LEN
         return 0;
     }
 
-    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 150 * levelNumber;
+    level->requiredDistanceToNextLevel = levelNumber == AMOUNT_OF_LEVELS ? INT_MAX : 500 * levelNumber;
 
     char coinPath[MAX_PATH_SIZE], spikePath[MAX_PATH_SIZE], wallPath[MAX_PATH_SIZE];
 
@@ -223,7 +223,7 @@ int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LEN
 
     level->speed = 0.2 + (levelNumber - 1) * LEVEL_SPEED_MULTIPLIER;
     level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
-    level->chanceLaserSpawn = (levelNumber - 1) * 0.12;
+    level->chanceLaserSpawn = (levelNumber /* - 1*/) * 0.30;
 
     printf("Level %d loaded successfully \n", levelNumber);
 
@@ -267,7 +267,7 @@ void drawLasers(Lasers lasers, Texture2D *texture, Sound sound) {
             opacity = dt * 255 / LASER_ACTIVATION_DELAY;
             opacity = minMax(opacity, 0, 255);
 
-            if (opacity == 255) {
+            if (opacity <= 128) {
                 PlaySound(sound);
             }
 
