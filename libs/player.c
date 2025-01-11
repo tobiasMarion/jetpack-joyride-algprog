@@ -32,7 +32,7 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->positionY = startYPosition * CELL_SIZE;
     player->speedY = 0;
     player->isTouchingTheGround = 0;
-    player->lives = 3;
+    player->lives = 1;
     player->coins = 0;
     player->distance = 0;
     player->isInvulnerable = 1;
@@ -81,6 +81,18 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
     }
 
     if (player->isInvulnerable) {
+        if (map[y][x] == 'C') {
+            player->coins += 1;
+            map[y][x] = ' ';
+            PlaySound(sounds->coin);
+        }
+
+        if (map[y+1][x] == 'C') {
+            player->coins += 1;
+            map[y+1][x] = ' ';
+            PlaySound(sounds->coin);
+        }
+
         return 0;
     }
 

@@ -108,7 +108,7 @@ int main() {
 
             case GAMEPLAY:
                 if (isLevelLoaded) {
-                    DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
+                    DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &level.mapTextures);
                     drawPlayer(&player);
