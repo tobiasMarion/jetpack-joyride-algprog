@@ -9,6 +9,7 @@ int main() {
     // Initialization
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
     InitAudioDevice();
+    SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     int framesCounter = 0;
     int isGameRunning = 1;
@@ -50,7 +51,7 @@ int main() {
                 loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
-            if(player.lives <= 0 || IsKeyPressed(KEY_G)) {
+            if(player.lives <= 0 || IsKeyPressed(KEY_ESCAPE)) {
                 currentScreen = GAMEOVER;
             }
 
