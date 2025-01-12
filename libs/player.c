@@ -5,6 +5,7 @@ typedef struct Sounds {
     Sound button;
     Sound coin;
     Sound hit;
+    Sound laser;
 } Sounds;
 
 typedef struct Player {
@@ -61,7 +62,7 @@ void drawPlayer(Player *player) {
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, color);
 }
 
-int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sounds) {
     int y = (int)(player->positionY / CELL_SIZE);
     int x = round(INITIAL_X_POSITION + offsetX);
     float decimalPartY = player->positionY - y;
@@ -80,22 +81,6 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->isTouchingTheGround = 1;
     }
 
-    if (player->isInvulnerable) {
-        if (map[y][x] == 'C') {
-            player->coins += 1;
-            map[y][x] = ' ';
-            PlaySound(sounds->coin);
-        }
-
-        if (map[y+1][x] == 'C') {
-            player->coins += 1;
-            map[y+1][x] = ' ';
-            PlaySound(sounds->coin);
-        }
-
-        return 0;
-    }
-
     if (map[y][x] == 'C') {
         player->coins += 1;
         map[y][x] = ' ';
@@ -106,6 +91,10 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->coins += 1;
         map[y+1][x] = ' ';
         PlaySound(sounds->coin);
+    }
+
+    if (player->isInvulnerable) {
+        return 0;
     }
 
     if (map[y][x] == 'Z') {
@@ -145,11 +134,22 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         return 1;
     }
 
+    int currentTime = GetTime();
+    int dt = currentTime - LASER_ACTIVATION_DELAY;
+    int isTouchingLaser = (lasers[y] < dt && lasers[y] != 0) || (decimalPartY > 0.7 && lasers[y+1] < dt && lasers[y+1] != 0);
+
+    if (isTouchingLaser) {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+    }
+
     return 0;
 }
 
 void checkCheatWords(Player *player, const char *activationWord1, const char *activationWord2,
-                     float *slowMotionUntil, int *isSlowMotionActive) {
+                    float *slowMotionUntil, int *isSlowMotionActive) {
 
     if (IsKeyPressed(KEY_BACKSPACE) && player->inputIndex > 0) {
         player->inputIndex--;
