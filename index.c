@@ -60,12 +60,12 @@ int main() {
                 currentScreen = GAMEOVER;
             }
 
-            checkCheatWords(&player, "WORD", "SLOW", &slowMotionUntil, &isSlowMotionActive);
+            checkCheatWords(&player, "GHOST", "SLOW", &slowMotionUntil, &isSlowMotionActive);
 
             if (isSlowMotionActive) {
-                currentSpeed = level.speed * 0.5f; // Velocidade reduzida
+                currentSpeed = level.speed * 0.5f;
             } else {
-                currentSpeed = level.speed;       // Velocidade normal
+                currentSpeed = level.speed;
             }
 
             player.distance += moveMap(currentSpeed, loadedMap);

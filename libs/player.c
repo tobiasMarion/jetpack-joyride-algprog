@@ -81,22 +81,6 @@ int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sound
         player->isTouchingTheGround = 1;
     }
 
-    if (player->isInvulnerable) {
-        if (map[y][x] == 'C') {
-            player->coins += 1;
-            map[y][x] = ' ';
-            PlaySound(sounds->coin);
-        }
-
-        if (map[y+1][x] == 'C') {
-            player->coins += 1;
-            map[y+1][x] = ' ';
-            PlaySound(sounds->coin);
-        }
-
-        return 0;
-    }
-
     if (map[y][x] == 'C') {
         player->coins += 1;
         map[y][x] = ' ';
@@ -107,6 +91,10 @@ int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sound
         player->coins += 1;
         map[y+1][x] = ' ';
         PlaySound(sounds->coin);
+    }
+
+    if (player->isInvulnerable) {
+        return 0;
     }
 
     if (map[y][x] == 'Z') {
@@ -161,7 +149,7 @@ int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sound
 }
 
 void checkCheatWords(Player *player, const char *activationWord1, const char *activationWord2,
-                     float *slowMotionUntil, int *isSlowMotionActive) {
+                    float *slowMotionUntil, int *isSlowMotionActive) {
 
     if (IsKeyPressed(KEY_BACKSPACE) && player->inputIndex > 0) {
         player->inputIndex--;
