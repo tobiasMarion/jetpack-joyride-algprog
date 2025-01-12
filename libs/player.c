@@ -6,6 +6,7 @@ typedef struct Sounds {
     Sound button;
     Sound coin;
     Sound hit;
+    Sound laser;
 } Sounds;
 
 typedef struct Player {
@@ -20,8 +21,8 @@ typedef struct Player {
     float positionY;
     float speedY;
     Texture2D texture;
-    int points;
-
+    char inputBuffer[MAX_INPUT_CHARS + 1];
+    int inputIndex;
 } Player;
 
 void initializePlayer(Player *player, float startYPosition, char textureName[]) {
@@ -31,12 +32,13 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->positionY = startYPosition * CELL_SIZE;
     player->speedY = 0;
     player->isTouchingTheGround = 0;
-    player->lives = 3;
+    player->lives = 1;
     player->coins = 0;
     player->distance = 0;
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-
+    player->inputBuffer[0] = '\0';
+    player->inputIndex = 0;
 }
 
 void movePlayer(Player *player, float speedToAdd) {
@@ -58,7 +60,7 @@ void drawPlayer(Player *player) {
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, color);
 }
 
-int checksCollision(Player *player, MapSection map, Sounds *sounds) {
+int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sounds) {
     int y = (int)(player->positionY / CELL_SIZE);
     int x = round(INITIAL_X_POSITION + offsetX);
     float decimalPartY = player->positionY - y;
@@ -77,10 +79,6 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->isTouchingTheGround = 1;
     }
 
-    if (player->isInvulnerable) {
-        return 0;
-    }
-
     if (map[y][x] == 'C') {
         player->coins += 1;
         map[y][x] = ' ';
@@ -91,6 +89,10 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         player->coins += 1;
         map[y+1][x] = ' ';
         PlaySound(sounds->coin);
+    }
+
+    if (player->isInvulnerable) {
+        return 0;
     }
 
     if (map[y][x] == 'Z') {
@@ -130,5 +132,55 @@ int checksCollision(Player *player, MapSection map, Sounds *sounds) {
         return 1;
     }
 
+    int currentTime = GetTime();
+    int dt = currentTime - LASER_ACTIVATION_DELAY;
+    int isTouchingLaser = (lasers[y] < dt && lasers[y] != 0) || (decimalPartY > 0.7 && lasers[y+1] < dt && lasers[y+1] != 0);
+
+    if (isTouchingLaser) {
+        player->lives -= 1;
+        player->isInvulnerable = 1;
+        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+        PlaySound(sounds->hit);
+    }
+
     return 0;
 }
+
+void checkCheatWords(Player *player, const char *activationWord1, const char *activationWord2,
+                    float *slowMotionUntil, int *isSlowMotionActive) {
+
+    if (IsKeyPressed(KEY_BACKSPACE) && player->inputIndex > 0) {
+        player->inputIndex--;
+        player->inputBuffer[player->inputIndex] = '\0';
+
+    } else if (IsKeyPressed(KEY_ENTER)) {
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+
+    } else {
+        for (int key = 'A'; key <= 'Z'; key++) {
+            if (IsKeyPressed(key)) {
+                if (player->inputIndex < MAX_INPUT_CHARS) {
+                    player->inputBuffer[player->inputIndex++] = (char)key;
+                    player->inputBuffer[player->inputIndex] = '\0';
+                }
+            }
+        }
+    }
+
+    if (strcmp(player->inputBuffer, activationWord1) == 0) {
+        player->isInvulnerable = 1; // Ativa invulnerabilidade
+        player->invulnerableUntill = GetTime() + 5.0f; // Dura 5 segundos
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+    }
+
+    if (strcmp(player->inputBuffer, activationWord2) == 0) {
+        *isSlowMotionActive = 1; // Ativa camera lenta
+        *slowMotionUntil = GetTime() + 5.0f;  // Dura 5 segundos
+        player->inputIndex = 0;
+        player->inputBuffer[0] = '\0';
+    }
+
+}
+
