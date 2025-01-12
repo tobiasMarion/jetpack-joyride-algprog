@@ -40,3 +40,7 @@
 #define BUTTON_LABEL_SIZE 40
 #define ERROR_MESSAGE_LENGTH 128
 
+// LEADERBOARD
+#define MAX_SAVES 5
+#define LEADERBOARD_FILE_PATH "leaderboard.bin"
+

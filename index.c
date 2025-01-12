@@ -3,7 +3,9 @@
 #include "./libs/constants.h"
 #include "./libs/map.c"
 #include "./libs/player.c"
+#include "./libs/leaderboard.c"
 #include "./libs/ui.c"
+
 
 int main() {
     // Initialization
@@ -15,6 +17,7 @@ int main() {
     int isGameRunning = 1;
     GameScreen currentScreen = HOME;
     char errorMessage[ERROR_MESSAGE_LENGTH] = {0};
+    char saveMessage[ERROR_MESSAGE_LENGTH] = {0};
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
@@ -22,6 +25,11 @@ int main() {
         LoadSound("resources/sounds/hit.mp3"),
         LoadSound("resources/sounds/laser.mp3")
     };
+
+    Save allSaves[MAX_SAVES] = {0};
+    Save currentSave;
+    initializeSave(&currentSave);
+    int allSaveSize = openSavesFile(allSaves);
 
     Player player;
     Level level = {0};
@@ -114,7 +122,7 @@ int main() {
 
         switch(currentScreen) {
             case HOME:
-                drawHomeScreen(&isGameRunning, &currentScreen, &player, &sounds.button);
+                drawHomeScreen(&isGameRunning, &currentScreen, &player, &currentSave, &sounds.button, &currentLevel, &isLevelLoaded, allSaves, allSaveSize);
                 break;
 
             case GAMEPLAY:
@@ -133,15 +141,19 @@ int main() {
                 break;
 
             case GAMEOVER:
-                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &currentLevel, &isLevelLoaded, &sounds.button);
+                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &currentSave, &currentLevel, &isLevelLoaded, &sounds.button);
                 break;
 
             case SAVEGAME:
-                drawSaveGameScreen(&currentScreen, &player, &sounds.button);
+                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, &allSaveSize);
                 break;
 
             case ERROR:
                 drawErrorScreen(&isGameRunning, errorMessage);
+                break;
+
+            case HIGHSCORES:
+                drawHighScoresScreen(allSaves, &allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
 
             default: break;
         }
@@ -157,6 +169,8 @@ int main() {
     UnloadSound(sounds.button);
     UnloadSound(sounds.coin);
     UnloadSound(sounds.hit);
+
+    saveSavesFile(allSaves, allSaveSize);
 
     CloseWindow();
 

@@ -1,8 +1,11 @@
 #include "raylib.h"
 #include "string.h"
 #include "constants.h"
+//#include "leaderboard.c"
 
-typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR } GameScreen;
+
+
+typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR, HIGHSCORES} GameScreen;
 
 
 // Receiveing an callback to execute on click would make it much verbose
@@ -92,17 +95,21 @@ void createInputText(char value[], int x, int y, Color bg, Color border, Color h
 }
 
 
-void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *player, Save *currentSave, Sound *buttonClickSound, int *currentLevel, int *isLevelLoaded, Save *allSaves,  int allSavesVectorSize) {
     int buttonX = BUTTON_POSITION_X_CENTER;
     DrawText("Jetpack Joyride",  (SCREEN_WIDTH - MeasureText("Jetpack Joyride", 100)) / 2 , 80, 100, RED);
 
     if (createButton("Play", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
+        initializeSave(currentSave);
+        *currentLevel = 1;
+        *isLevelLoaded = 0;
         *currentScreen = GAMEPLAY;
+
     }
 
     if (createButton("Highscores", buttonX, 350, KEY_S, BLACK, RED, buttonClickSound)) {
-        *currentScreen = SAVEGAME;
+        *currentScreen = HIGHSCORES;
     }
 
     if (createButton("Exit Game", buttonX, 475, KEY_E, BLACK, RED, buttonClickSound)) {
@@ -115,6 +122,7 @@ void drawGameOverScreen(
     int *isGameRunning,
     GameScreen *currentScreen,
     Player *player,
+    Save *currentSave,
     int *currentLevel,
     int *isLevelLoaded,
     Sound *buttonClickSound
@@ -124,6 +132,7 @@ void drawGameOverScreen(
 
     if (createButton("Restart Game", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
+        initializeSave(currentSave);
         *currentScreen = GAMEPLAY;
         *currentLevel = 1;
         *isLevelLoaded = 0;
@@ -143,9 +152,12 @@ void drawGameOverScreen(
 }
 
 
-void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *buttonClickSound) {
+void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClickSound, Player *player,
+                        char *globalMessage, Save *allSaves, int *allSaveVectorSize) {
+
+    score(save, player);
     DrawText("Save Game menu", (SCREEN_WIDTH - MeasureText("Save Game Menu", 80)) / 2, 80, 80, BLACK );
-    DrawText(TextFormat("You got %d points!"), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!"),40)) / 2, 180, 40, DARKGREEN);
+    DrawText(TextFormat("You got %d points!", save->points), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!"),40)) / 2, 180, 40, DARKGREEN);
 
     DrawText("Place mouse over input box to write your name!", ( (SCREEN_WIDTH - MeasureText("Place mouse over input box to write your name!",29)) / 2), 350, 29, BLACK);
 
@@ -154,10 +166,27 @@ void drawSaveGameScreen(GameScreen *currentScreen, Player *player, Sound *button
     int saveButtonX = (SCREEN_WIDTH - (2 * BUTTON_WIDTH + buttonsGap)) / 2;
     int returnButtonX = saveButtonX + BUTTON_WIDTH + buttonsGap;
 
-    createInputText(player->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
+    createInputText(save->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
+
 
     if (createButton("Save Progress", saveButtonX, buttonsY, -1, GREEN, BLACK, buttonClickSound)) {
+
+        if(verifyName(save) == 0)
+        {
+
+            strcpy(globalMessage, "Write a name to save game!");
+
+        }else{
+
+        globalMessage[0] = '\0';
+        saveGame(save, globalMessage, allSaves, allSaveVectorSize);
+        *currentScreen = HIGHSCORES;
+
+
+        }
     }
+
+    DrawText(globalMessage, (SCREEN_WIDTH - MeasureText(globalMessage,50)) / 2, 700,50,RED);
 
     if (createButton("Return", returnButtonX, buttonsY, -1, BLACK, RED, buttonClickSound)) {
         *currentScreen = GAMEOVER;
@@ -197,3 +226,45 @@ void drawErrorScreen(int *isGameRunning, char errorMessage[ERROR_MESSAGE_LENGTH]
         256, 60, WHITE
     );
 }
+
+void drawSave( Save *allSaves, int *AllSavesSize) {
+    int size = *AllSavesSize;
+    int i = 0;
+    int height = 200;
+
+
+    for( i = 0; i < size ; i++) {
+        DrawText(allSaves[i].name, 200, height, 40, WHITE);
+        DrawText( TextFormat("%d",allSaves[i].points), 700, height, 40, WHITE);
+        DrawText( TextFormat("%2d/%2d/%4d - %2d:%2d",allSaves[i].currentDate.month, allSaves[i].currentDate.day,allSaves[i].currentDate.year,allSaves[i].currentDate.hour,allSaves[i].currentDate.minute),1400,height,40,WHITE);
+        height = height + 40;
+    }
+
+
+
+}
+
+
+void drawHighScoresScreen(Save *allSaves, int *AllSavesSize, char *globalMessage, Sound *buttonClickSound, int *isGameRunning, GameScreen *currentScreen) {
+
+    ClearBackground(BLACK);
+    DrawText("Highscores", 200 , 40, 80, RED );
+    DrawText(globalMessage, 20, 708, 30, DARKPURPLE);
+
+    DrawText("NAME:", 200, 160, 40, GOLD);
+    DrawText("SCORE:", 700, 160, 40, GOLD);
+    DrawText("DATE:",1400, 160, 40, GOLD);
+    drawSave(allSaves, AllSavesSize);
+
+    if(createButton("Exit", 1400, 650, KEY_E, RED, DARKPURPLE, buttonClickSound)) {
+        *isGameRunning = 0;
+    }
+
+    if(createButton("Back to menu", 880, 650, KEY_B, DARKGREEN, GREEN, buttonClickSound)) {
+        globalMessage[0] = '\0';
+        *currentScreen = HOME;
+    }
+
+
+}
+

@@ -1,6 +1,6 @@
 # Trabalho Final Alg&Prog
 
-Trabalho final desenvoldido para a disciplina de Algoritmos e Programação na UFRGS
+Trabalho final desenvolvido para a disciplina de Algoritmos e Programação na UFRGS
 
 ## Lista de Tarefas
 
@@ -9,7 +9,7 @@ Trabalho final desenvoldido para a disciplina de Algoritmos e Programação na U
     - [x] Jogo
     - [ ] Pausa
     - [x] Final
-    - [ ] Salvar Record
+    - [x] Salvar Record
 
 - [x] Assets (imagens, ícones, sons)
 - [x] Desenhar e Mapa Carregar o mapa (12x30, 12x240)
@@ -21,5 +21,5 @@ Trabalho final desenvoldido para a disciplina de Algoritmos e Programação na U
 - [x] Pause (correção da tecla ESC)
 - [ ] Adicionar movimento das setinhas nos menus
 - [x] Progresso de Nível
-- [ ] Salvar e carregar pontuações
+- [x] Salvar e carregar pontuações
 

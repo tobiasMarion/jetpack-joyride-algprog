@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <math.h>
+#include "constants.h"
 
 typedef struct Sounds {
     Sound button;
@@ -20,10 +21,8 @@ typedef struct Player {
     float positionY;
     float speedY;
     Texture2D texture;
-    char name[MAX_INPUT_CHARS + 1];
     char inputBuffer[MAX_INPUT_CHARS + 1];
     int inputIndex;
-
 } Player;
 
 void initializePlayer(Player *player, float startYPosition, char textureName[]) {
@@ -38,7 +37,6 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->distance = 0;
     player->isInvulnerable = 1;
     player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-    player->name[0] = '\0';
     player->inputBuffer[0] = '\0';
     player->inputIndex = 0;
 }
