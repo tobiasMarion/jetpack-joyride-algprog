@@ -1,21 +1,49 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "raylib.h"
 #include "constants.h"
+
+
+typedef struct date {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+} Date;
 
 typedef struct Save {
     char name[MAX_INPUT_CHARS + 1];
     int points;
-    int timestamp;
+    Date currentDate;
 } Save;
 
 void initializeSave (Save *save) {
     save->name[0] = '\0';
     save->points = 0;
-    save->timestamp = 0;
+    save->currentDate.year = 0;
+    save->currentDate.month = 0;
+    save->currentDate.day = 0;
+    save->currentDate.hour = 0;
+    save->currentDate.minute = 0;
 }
 
-void points(Save *save, Player *player) {
+
+void giveDate(Save *currentSave) {
+    time_t t = time(NULL);
+
+    struct tm date = *localtime(&t);
+
+    currentSave->currentDate.year = date.tm_year + 1900;
+    currentSave->currentDate.month = date.tm_mon + 1;
+    currentSave->currentDate.day = date.tm_mday;
+    currentSave->currentDate.hour= date.tm_hour;
+    currentSave->currentDate.minute = date.tm_min;
+
+}
+
+void score(Save *save, Player *player) {
     int distance = player->distance;
     int coins = player->coins;
 
@@ -30,78 +58,91 @@ int verifyName(Save *save) {
     return 1;
 }
 
-int sortSaves(Save *save, Save allSave[]) {
-    //Implementação do algoritmo de ordenamaento.
-}
+void sortSaves(Save *allSave, int allSaveVectorSize) {
+    Save temp;
+    int i;
+    int change = 1;
 
-//função que abre o binario.
+    while( change != 0) {
+        change = 0;
 
-//função que salva o vetor no binario.
+        for(i = 0; i < allSaveVectorSize - 1; i++){
 
-void saveGame(Save *save, char *globalMessage, Save *allsaves[MAX_SAVES]) {
+            if( allSave[i].points < allSave[i+1].points) {
 
-    int result = verifyName(save);
-    Save allSaves[MAX_SAVES];
-
-    if(result) {
-            //1) Colocar o save atual no vetor
-            //2) Ordenar o vetor allSaves por pontuação.
-            //5) Se tudo der certo, atribui a mensagem de sucesso na mensagem global. Se não, atribui a mensagem de erro.
-    }else {
-        strncpy(globalMessage, "Write a name to save game!", 100);
-
-    }
-
-
-
-}
-
-
-/*
-
-
-void saveGame(char *name, Player *player) {
-    int result = verifyName(name, player);
-
-    switch(result) {
-
-        case 0:
-            DrawText("Error opening bin file!",
-                     (SCREEN_WIDTH - MeasureText("Error opening bin file!", 40)) / 2,
-                     680,
-                     40,
-                     DARKGREEN);
-        break;
-
-        case 1:
-            FILE *file = fopen("save/saves.bin", "a");
-            if(fwrite(&player, sizeof(Player), 1, file)) {
-                DrawText("Saved successfuly!",
-                         (SCREEN_WIDTH - MeasureText("Saved successfuly!", 40)) / 2,
-                         680,
-                         40,
-                         DARKGREEN);
+                temp = allSave[i];
+                allSave[i] = allSave[i+1];
+                allSave[i+1] = temp;
+                change++;
             }
-            fclose(file);
-        break;
-
-        case 2:
-            DrawText("This name alredy has been saved! Choose another!",
-                     (SCREEN_WIDTH - MeasureText("This name alredy has been saved! Choose another!", 40)) / 2,
-                     680,
-                     40,
-                     RED);
-        break;
-
-        case 3:
-            DrawText("You must write a name to save game!",
-                     (SCREEN_WIDTH - MeasureText("You must write a name to save game!", 40)) / 2,
-                     680,
-                     40,
-                     RED);
-        break;
-
-        default: break;
+        }
     }
-}*/
+}
 
+int openFile(Save *vectorSaves) {
+    FILE *file = fopen("saves/saves.bin", "r");
+    if(file == NULL) { return 0;}
+    int i;
+
+    fseek(file, 0, SEEK_END);
+    int fileSize = ftell(file) / sizeof(Save);
+    rewind(file);
+
+    int result = fread(vectorSaves, sizeof(Save), fileSize, file);
+    fclose(file);
+
+    return result; //Return quantidy of structs Save that was written in vectorSaves (use to pass as allSaveVectorSize parameter of saveGame function)
+}
+
+
+void saveFile(Save *vectorSaves, int vectorSize) {
+    FILE *file = fopen("saves/saves.bin", "w");
+
+    fwrite(vectorSaves, sizeof(Save), vectorSize, file);
+    fclose(file);
+}
+
+
+//Parametros:
+// 1) Um ponteiro para um tipo Save, nessa caso será o currentSave, declarado no Index.c.
+// 2) Um ponteiro para uma string globalMessage, também declarado no index.c.
+// 3) Um ponteiro para um vetor de Saves, também declarado no index.c.
+// 4) Um ponteiro para um inteiro, também declarado no index.c
+// Todos esse parametros serão passados para a função drawnSaveGameScreen, que de fato vai chamar a função saveGame.
+
+void saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
+
+    int result = verifyName(currentSave);
+    giveDate(currentSave);
+    if(result == 1) {
+
+        if( *allSaveVectorSize == 0) {
+
+            allsaves[*allSaveVectorSize] = *currentSave;
+            (*allSaveVectorSize)++;
+            strcpy(globalMessage, "Score saved!!");
+
+        }else if(*allSaveVectorSize == MAX_SAVES)
+        {
+            if(allsaves[*allSaveVectorSize - 1].points < currentSave->points)
+            {
+                allsaves[*allSaveVectorSize - 1] = *currentSave;
+                strcpy(globalMessage, "Score saved!!");
+
+            }else
+            {
+                strcpy(globalMessage, "New score is not high enough to be saved, Git Gud!");
+            }
+        }else if( *allSaveVectorSize < MAX_SAVES)
+        {
+            allsaves[*allSaveVectorSize] = *currentSave;
+            (*allSaveVectorSize)++;
+            strcpy(globalMessage, "Score saved!!");
+
+        }
+
+        sortSaves(allsaves, *allSaveVectorSize);
+
+    }
+
+}

@@ -6,6 +6,7 @@
 #include "./libs/leaderboard.c"
 #include "./libs/ui.c"
 
+
 int main() {
     // Initialization
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Jetpack Joyride - INF5102");
@@ -15,6 +16,7 @@ int main() {
     int isGameRunning = 1;
     GameScreen currentScreen = HOME;
     char errorMessage[ERROR_MESSAGE_LENGTH] = {0};
+    char saveMessage[ERROR_MESSAGE_LENGTH] = {0};
 
     Sounds sounds = {
         LoadSound("resources/sounds/button1.wav"),
@@ -22,9 +24,13 @@ int main() {
         LoadSound("resources/sounds/hit.mp3")
     };
 
-
+    Save allSaves[MAX_SAVES] = {0};
     Save currentSave;
     initializeSave(&currentSave);
+    int allSaveSize = openFile(allSaves);
+
+    printf("[%d]",allSaveSize);
+
     Player player;
     Level level = {0};
     double upLevelAt = 0;
@@ -91,11 +97,12 @@ int main() {
 
         switch(currentScreen) {
             case HOME:
-                drawHomeScreen(&isGameRunning, &currentScreen, &player, &sounds.button);
+                drawHomeScreen(&isGameRunning, &currentScreen, &player, &currentSave, &sounds.button, &currentLevel, &isLevelLoaded, allSaves, allSaveSize);
                 break;
 
             case GAMEPLAY:
-                if (isLevelLoaded) {
+                if (isLevelLoaded)
+                {
                     DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &level.mapTextures);
@@ -109,16 +116,19 @@ int main() {
                 break;
 
             case GAMEOVER:
-                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &currentLevel, &isLevelLoaded, &sounds.button);
+                drawGameOverScreen(&isGameRunning, &currentScreen, &player, &currentSave, &currentLevel, &isLevelLoaded, &sounds.button);
                 break;
 
             case SAVEGAME:
-                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button);
-
+                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, &allSaveSize);
                 break;
 
             case ERROR:
                 drawErrorScreen(&isGameRunning, errorMessage);
+                break;
+
+            case HIGHSCORES:
+                drawHighScoresScreen(allSaves, &allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
 
             default: break;
         }
