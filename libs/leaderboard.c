@@ -40,7 +40,6 @@ void giveDate(Save *currentSave) {
     currentSave->currentDate.day = date.tm_mday;
     currentSave->currentDate.hour= date.tm_hour;
     currentSave->currentDate.minute = date.tm_min;
-
 }
 
 void score(Save *save, Player *player) {
@@ -51,7 +50,6 @@ void score(Save *save, Player *player) {
 }
 
 int verifyName(Save *save) {
-
     if(save->name[0] == '\0') {
         return 0;   //Se o nome não foi escrito.
     }
@@ -79,8 +77,8 @@ void sortSaves(Save *allSave, int allSaveVectorSize) {
     }
 }
 
-int openFile(Save *vectorSaves) {
-    FILE *file = fopen("saves/saves.bin", "r");
+int openSavesFile(Save *vectorSaves) {
+    FILE *file = fopen(LEADERBOARD_FILE_PATH, "r");
     if(file == NULL) { return 0;}
     int i;
 
@@ -95,11 +93,16 @@ int openFile(Save *vectorSaves) {
 }
 
 
-void saveFile(Save *vectorSaves, int vectorSize) {
-    FILE *file = fopen("saves/saves.bin", "w");
+int saveSavesFile(Save *vectorSaves, int vectorSize) {
+    FILE *file = fopen(LEADERBOARD_FILE_PATH, "w");
+
+    if (file == NULL) {
+        return 0;
+    }
 
     fwrite(vectorSaves, sizeof(Save), vectorSize, file);
     fclose(file);
+    return 1;
 }
 
 
@@ -110,39 +113,32 @@ void saveFile(Save *vectorSaves, int vectorSize) {
 // 4) Um ponteiro para um inteiro, também declarado no index.c
 // Todos esse parametros serão passados para a função drawnSaveGameScreen, que de fato vai chamar a função saveGame.
 
-void saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
-
-    int result = verifyName(currentSave);
-    giveDate(currentSave);
-    if(result == 1) {
-
-        if( *allSaveVectorSize == 0) {
-
-            allsaves[*allSaveVectorSize] = *currentSave;
-            (*allSaveVectorSize)++;
-            strcpy(globalMessage, "Score saved!!");
-
-        }else if(*allSaveVectorSize == MAX_SAVES)
-        {
-            if(allsaves[*allSaveVectorSize - 1].points < currentSave->points)
-            {
-                allsaves[*allSaveVectorSize - 1] = *currentSave;
-                strcpy(globalMessage, "Score saved!!");
-
-            }else
-            {
-                strcpy(globalMessage, "New score is not high enough to be saved, Git Gud!");
-            }
-        }else if( *allSaveVectorSize < MAX_SAVES)
-        {
-            allsaves[*allSaveVectorSize] = *currentSave;
-            (*allSaveVectorSize)++;
-            strcpy(globalMessage, "Score saved!!");
-
-        }
-
-        sortSaves(allsaves, *allSaveVectorSize);
-
+int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
+    if (!verifyName(currentSave)) {
+        return 0;
     }
 
+    giveDate(currentSave);
+
+    if(*allSaveVectorSize < MAX_SAVES) {
+        allsaves[*allSaveVectorSize] = *currentSave;
+        (*allSaveVectorSize)++;
+        strcpy(globalMessage, "Score saved!!");
+        sortSaves(allsaves, *allSaveVectorSize);
+
+        return 1;
+    }
+
+
+    if (allsaves[*allSaveVectorSize - 1].points > currentSave->points) {
+        strcpy(globalMessage, "New score is not high enough to be saved, Git Gud!");
+
+        return 0;
+    }
+
+    allsaves[*allSaveVectorSize - 1] = *currentSave;
+    strcpy(globalMessage, "Score saved!!");
+    sortSaves(allsaves, *allSaveVectorSize);
+
+    return 1;
 }

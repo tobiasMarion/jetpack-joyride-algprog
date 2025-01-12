@@ -113,7 +113,6 @@ void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *playe
     }
 
     if (createButton("Exit Game", buttonX, 475, KEY_E, BLACK, RED, buttonClickSound)) {
-        saveFile(allSaves, allSavesVectorSize);
         *isGameRunning = 0;
     }
 }
@@ -258,7 +257,6 @@ void drawHighScoresScreen(Save *allSaves, int *AllSavesSize, char *globalMessage
     drawSave(allSaves, AllSavesSize);
 
     if(createButton("Exit", 1400, 650, KEY_E, RED, DARKPURPLE, buttonClickSound)) {
-        saveFile(allSaves, *AllSavesSize);
         *isGameRunning = 0;
     }
 

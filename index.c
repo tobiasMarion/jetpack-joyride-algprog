@@ -27,9 +27,7 @@ int main() {
     Save allSaves[MAX_SAVES] = {0};
     Save currentSave;
     initializeSave(&currentSave);
-    int allSaveSize = openFile(allSaves);
-
-    printf("[%d]",allSaveSize);
+    int allSaveSize = openSavesFile(allSaves);
 
     Player player;
     Level level = {0};
@@ -101,8 +99,7 @@ int main() {
                 break;
 
             case GAMEPLAY:
-                if (isLevelLoaded)
-                {
+                if (isLevelLoaded) {
                     DrawText(TextFormat("LIVES: %d", player.lives), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &level.mapTextures);
@@ -144,6 +141,8 @@ int main() {
     UnloadSound(sounds.button);
     UnloadSound(sounds.coin);
     UnloadSound(sounds.hit);
+
+    saveSavesFile(allSaves, allSaveSize);
 
     CloseWindow();
 
