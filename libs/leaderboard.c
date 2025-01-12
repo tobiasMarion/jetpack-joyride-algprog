@@ -106,13 +106,6 @@ int saveSavesFile(Save *vectorSaves, int vectorSize) {
 }
 
 
-//Parametros:
-// 1) Um ponteiro para um tipo Save, nessa caso será o currentSave, declarado no Index.c.
-// 2) Um ponteiro para uma string globalMessage, também declarado no index.c.
-// 3) Um ponteiro para um vetor de Saves, também declarado no index.c.
-// 4) Um ponteiro para um inteiro, também declarado no index.c
-// Todos esse parametros serão passados para a função drawnSaveGameScreen, que de fato vai chamar a função saveGame.
-
 int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
     if (!verifyName(currentSave)) {
         return 0;

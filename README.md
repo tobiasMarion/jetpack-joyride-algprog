@@ -22,4 +22,8 @@ Trabalho final desenvolvido para a disciplina de Algoritmos e Programação na U
 - [ ] Adicionar movimento das setinhas nos menus
 - [x] Progresso de Nível
 - [x] Salvar e carregar pontuações
-
+- [ ] Refatorar a parte dos cheats
+- [ ] Relatório
+- [ ] COLISÃO
+- [ ] Coletável
+- [ ] Trocar para .h's

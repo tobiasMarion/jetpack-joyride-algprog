@@ -130,8 +130,8 @@ int main() {
                     DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
                     DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
                     drawMap(loadedMap, &level.mapTextures);
-                    drawLasers(lasers, &laserTexture, sounds.laser);
                     drawPlayer(&player);
+                    drawLasers(lasers, &laserTexture, sounds.laser);
                 }
 
                 break;
