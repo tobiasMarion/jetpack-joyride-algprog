@@ -64,7 +64,7 @@ int main() {
                 loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
-            if(player.lives <= 0 || IsKeyPressed(KEY_ESCAPE)) {
+            if(player.lives <= 0) {
                 currentScreen = GAMEOVER;
             }
 
@@ -153,7 +153,7 @@ int main() {
                 break;
 
             case HIGHSCORES:
-                drawHighScoresScreen(allSaves, &allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
+                drawHighScoresScreen(allSaves, allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
 
             default: break;
         }
