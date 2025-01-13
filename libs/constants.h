@@ -44,3 +44,8 @@
 #define MAX_SAVES 5
 #define LEADERBOARD_FILE_PATH "leaderboard.bin"
 
+// CHEATS
+#define INVULNERABLE_CHEAT_CODE "GHOST"
+#define SLOW_CHEAT_CODE "SLOW"
+
+

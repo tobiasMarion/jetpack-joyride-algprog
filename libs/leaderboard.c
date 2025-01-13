@@ -106,39 +106,32 @@ int saveSavesFile(Save *vectorSaves, int vectorSize) {
 }
 
 
-//Parametros:
-// 1) Um ponteiro para um tipo Save, nessa caso será o currentSave, declarado no Index.c.
-// 2) Um ponteiro para uma string globalMessage, também declarado no index.c.
-// 3) Um ponteiro para um vetor de Saves, também declarado no index.c.
-// 4) Um ponteiro para um inteiro, também declarado no index.c
-// Todos esse parametros serão passados para a função drawnSaveGameScreen, que de fato vai chamar a função saveGame.
-
-int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
+int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int allSaveVectorSize) {
     if (!verifyName(currentSave)) {
         return 0;
     }
 
     giveDate(currentSave);
 
-    if(*allSaveVectorSize < MAX_SAVES) {
-        allsaves[*allSaveVectorSize] = *currentSave;
-        (*allSaveVectorSize)++;
+    if(allSaveVectorSize < MAX_SAVES) {
+        allsaves[allSaveVectorSize] = *currentSave;
+        allSaveVectorSize++;
         strcpy(globalMessage, "Score saved!!");
-        sortSaves(allsaves, *allSaveVectorSize);
+        sortSaves(allsaves, allSaveVectorSize);
 
         return 1;
     }
 
 
-    if (allsaves[*allSaveVectorSize - 1].points > currentSave->points) {
+    if (allsaves[allSaveVectorSize - 1].points > currentSave->points) {
         strcpy(globalMessage, "New score is not high enough to be saved, Git Gud!");
 
         return 0;
     }
 
-    allsaves[*allSaveVectorSize - 1] = *currentSave;
+    allsaves[allSaveVectorSize - 1] = *currentSave;
     strcpy(globalMessage, "Score saved!!");
-    sortSaves(allsaves, *allSaveVectorSize);
+    sortSaves(allsaves, allSaveVectorSize);
 
     return 1;
 }

@@ -264,7 +264,7 @@ void drawLasers(Lasers lasers, Texture2D *texture, Sound sound) {
     for (int i = 0; i < MAP_HEIGHT; i++) {
         if (lasers[i] != 0 && lasers[i] + LASER_ACTIVATION_DELAY + 1 > currentTime) {
             dt = currentTime - lasers[i];
-            opacity = dt * 255 / LASER_ACTIVATION_DELAY;
+            opacity = dt * 128 / LASER_ACTIVATION_DELAY;
             opacity = minMax(opacity, 0, 255);
 
             if (opacity <= 128) {

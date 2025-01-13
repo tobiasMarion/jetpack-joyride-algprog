@@ -7,9 +7,11 @@
 
 typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR, HIGHSCORES} GameScreen;
 
+int amountOfOptionsOnScreen = 0;
+int currentSelectedOption = -1;
 
 // Receiveing an callback to execute on click would make it much verbose
-int createButton(char label[], int x, int y, int shortcut, Color color, Color hoverColor, Sound *sound) {
+int createButton(char label[], int x, int y, int shortcut, int isSelected, Color color, Color hoverColor, Sound *sound) {
     Rectangle button = {
         x, y,
         BUTTON_WIDTH,
@@ -19,7 +21,7 @@ int createButton(char label[], int x, int y, int shortcut, Color color, Color ho
     Vector2 mousePosition = GetMousePosition();
     bool isHovering = CheckCollisionPointRec(mousePosition, button);
 
-    if (isHovering) {
+    if (isHovering || isSelected) {
         DrawRectangle(
             x - LINE_THICKNESS,
             y - LINE_THICKNESS,
@@ -34,9 +36,9 @@ int createButton(char label[], int x, int y, int shortcut, Color color, Color ho
 
 
     DrawRectangleRec(button, color);
-    DrawText(label, labelX, labelY, BUTTON_LABEL_SIZE, isHovering ? hoverColor : WHITE);
+    DrawText(label, labelX, labelY, BUTTON_LABEL_SIZE, isHovering || isSelected ? hoverColor : WHITE);
 
-    if ((isHovering && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) || IsKeyPressed(shortcut)) {
+    if ((isHovering && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) || IsKeyPressed(shortcut)|| (isSelected && IsKeyPressed(KEY_ENTER))) {
         if (sound != NULL) {
             PlaySound(*sound);
         }
@@ -94,12 +96,35 @@ void createInputText(char value[], int x, int y, Color bg, Color border, Color h
     DrawText(value, labelX, labelY, BUTTON_LABEL_SIZE, isHovering ? hover : border);
 }
 
+void navigateWithArrowKeys(int totalOptions) {
+    amountOfOptionsOnScreen = totalOptions;
+    Vector2 mouseDelta = GetMouseDelta();
+
+    if (mouseDelta.x != 0 || mouseDelta.y != 0) {
+        currentSelectedOption = -1;
+    }
+
+    if (IsKeyPressed(KEY_UP)) {
+        currentSelectedOption = (currentSelectedOption + amountOfOptionsOnScreen - 1) % amountOfOptionsOnScreen;
+    }
+
+    if (IsKeyPressed(KEY_DOWN)) {
+        currentSelectedOption = (currentSelectedOption + 1) % amountOfOptionsOnScreen;
+    }
+}
+
+int isOptionSelected(int o) {
+    return currentSelectedOption == o;
+}
+
 
 void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *player, Save *currentSave, Sound *buttonClickSound, int *currentLevel, int *isLevelLoaded, Save *allSaves,  int allSavesVectorSize) {
     int buttonX = BUTTON_POSITION_X_CENTER;
+    navigateWithArrowKeys(3);
+
     DrawText("Jetpack Joyride",  (SCREEN_WIDTH - MeasureText("Jetpack Joyride", 100)) / 2 , 80, 100, RED);
 
-    if (createButton("Play", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
+    if (createButton("Play", buttonX, 225, KEY_R, isOptionSelected(0), BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
         initializeSave(currentSave);
         *currentLevel = 1;
@@ -108,11 +133,11 @@ void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *playe
 
     }
 
-    if (createButton("Highscores", buttonX, 350, KEY_S, BLACK, RED, buttonClickSound)) {
+    if (createButton("Highscores", buttonX, 350, KEY_S, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
         *currentScreen = HIGHSCORES;
     }
 
-    if (createButton("Exit Game", buttonX, 475, KEY_E, BLACK, RED, buttonClickSound)) {
+    if (createButton("Exit Game", buttonX, 475, KEY_E, isOptionSelected(2), BLACK, RED, buttonClickSound)) {
         *isGameRunning = 0;
     }
 }
@@ -128,9 +153,11 @@ void drawGameOverScreen(
     Sound *buttonClickSound
 ) {
     int buttonX = BUTTON_POSITION_X_CENTER;
+    navigateWithArrowKeys(4);
+
     DrawText("YOU DIED",  (SCREEN_WIDTH - MeasureText("YOU DIED",100)) / 2 , 80, 100, RED);
 
-    if (createButton("Restart Game", buttonX, 225, KEY_R, BLACK, RED, buttonClickSound)) {
+    if (createButton("Restart Game", buttonX, 225, KEY_R, isOptionSelected(0), BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
         initializeSave(currentSave);
         *currentScreen = GAMEPLAY;
@@ -138,24 +165,24 @@ void drawGameOverScreen(
         *isLevelLoaded = 0;
     }
 
-    if (createButton("Save Game", buttonX, 350, KEY_S, BLACK, RED, buttonClickSound)) {
+    if (createButton("Save Game", buttonX, 350, KEY_S, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
         *currentScreen = SAVEGAME;
     }
 
-    if (createButton("Back to Menu", buttonX, 475, KEY_M, BLACK, RED, buttonClickSound)) {
+    if (createButton("Back to Menu", buttonX, 475, KEY_M, isOptionSelected(2), BLACK, RED, buttonClickSound)) {
         *currentScreen = HOME;
     }
 
-    if (createButton("Exit Game", buttonX, 600, KEY_E, BLACK, RED, buttonClickSound)) {
+    if (createButton("Exit Game", buttonX, 600, KEY_E, isOptionSelected(3), BLACK, RED, buttonClickSound)) {
         *isGameRunning = 0;
     }
 }
 
 
 void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClickSound, Player *player,
-                        char *globalMessage, Save *allSaves, int *allSaveVectorSize) {
-
+                        char *globalMessage, Save *allSaves, int allSaveVectorSize) {
     score(save, player);
+    navigateWithArrowKeys(2);
     DrawText("Save Game menu", (SCREEN_WIDTH - MeasureText("Save Game Menu", 80)) / 2, 80, 80, BLACK );
     DrawText(TextFormat("You got %d points!", save->points), (SCREEN_WIDTH - MeasureText(TextFormat("You got %d points!"),40)) / 2, 180, 40, DARKGREEN);
 
@@ -169,26 +196,19 @@ void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClic
     createInputText(save->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
 
 
-    if (createButton("Save Progress", saveButtonX, buttonsY, -1, GREEN, BLACK, buttonClickSound)) {
-
-        if(verifyName(save) == 0)
-        {
-
+    if (createButton("Save Progress", saveButtonX, buttonsY, -1, isOptionSelected(0), GREEN, BLACK, buttonClickSound)) {
+        if(verifyName(save)) {
+            globalMessage[0] = '\0';
+            saveGame(save, globalMessage, allSaves, allSaveVectorSize);
+            *currentScreen = HIGHSCORES;
+        } else{
             strcpy(globalMessage, "Write a name to save game!");
-
-        }else{
-
-        globalMessage[0] = '\0';
-        saveGame(save, globalMessage, allSaves, allSaveVectorSize);
-        *currentScreen = HIGHSCORES;
-
-
         }
     }
 
     DrawText(globalMessage, (SCREEN_WIDTH - MeasureText(globalMessage,50)) / 2, 700,50,RED);
 
-    if (createButton("Return", returnButtonX, buttonsY, -1, BLACK, RED, buttonClickSound)) {
+    if (createButton("Return", returnButtonX, buttonsY, -1, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
         *currentScreen = GAMEOVER;
     }
 }
@@ -214,57 +234,50 @@ void drawNextLevelScreen(int n, double upLevelAt, GameScreen *currentScreen) {
 void drawErrorScreen(int *isGameRunning, char errorMessage[ERROR_MESSAGE_LENGTH]) {
     ClearBackground(RED);
 
-    DrawText(
-        "ERROR",
+    DrawText("ERROR",
         (SCREEN_WIDTH - MeasureText("ERROR", 100)) / 2,
         80, 100, WHITE
     );
 
-    DrawText(
-        errorMessage,
+    DrawText(errorMessage,
         (SCREEN_WIDTH - MeasureText(errorMessage, 60)) / 2,
         256, 60, WHITE
     );
 }
 
-void drawSave( Save *allSaves, int *AllSavesSize) {
-    int size = *AllSavesSize;
+void drawSave(Save *allSaves, int size) {
     int i = 0;
     int height = 200;
 
-
     for( i = 0; i < size ; i++) {
         DrawText(allSaves[i].name, 200, height, 40, WHITE);
-        DrawText( TextFormat("%d",allSaves[i].points), 700, height, 40, WHITE);
-        DrawText( TextFormat("%2d/%2d/%4d - %2d:%2d",allSaves[i].currentDate.month, allSaves[i].currentDate.day,allSaves[i].currentDate.year,allSaves[i].currentDate.hour,allSaves[i].currentDate.minute),1400,height,40,WHITE);
+        DrawText(TextFormat("%d",allSaves[i].points), 700, height, 40, WHITE);
+        DrawText(TextFormat("%2d/%2d/%4d - %2d:%2d",allSaves[i].currentDate.month, allSaves[i].currentDate.day,
+                 allSaves[i].currentDate.year,allSaves[i].currentDate.hour,allSaves[i].currentDate.minute),
+                 1400,height,40,WHITE);
         height = height + 40;
     }
-
-
-
 }
 
 
-void drawHighScoresScreen(Save *allSaves, int *AllSavesSize, char *globalMessage, Sound *buttonClickSound, int *isGameRunning, GameScreen *currentScreen) {
-
+void drawHighScoresScreen(Save *allSaves, int allSavesSize, char *globalMessage, Sound *buttonClickSound, int *isGameRunning, GameScreen *currentScreen) {
     ClearBackground(BLACK);
+    navigateWithArrowKeys(2);
     DrawText("Highscores", 200 , 40, 80, RED );
     DrawText(globalMessage, 20, 708, 30, DARKPURPLE);
 
     DrawText("NAME:", 200, 160, 40, GOLD);
     DrawText("SCORE:", 700, 160, 40, GOLD);
     DrawText("DATE:",1400, 160, 40, GOLD);
-    drawSave(allSaves, AllSavesSize);
+    drawSave(allSaves, allSavesSize);
 
-    if(createButton("Exit", 1400, 650, KEY_E, RED, DARKPURPLE, buttonClickSound)) {
+    if(createButton("Exit", 1400, 650, KEY_E, isOptionSelected(0), RED, DARKPURPLE, buttonClickSound)) {
         *isGameRunning = 0;
     }
 
-    if(createButton("Back to menu", 880, 650, KEY_B, DARKGREEN, GREEN, buttonClickSound)) {
+    if(createButton("Back to menu", 880, 650, KEY_B, isOptionSelected(1), DARKGREEN, GREEN, buttonClickSound)) {
         globalMessage[0] = '\0';
         *currentScreen = HOME;
     }
-
-
 }
 

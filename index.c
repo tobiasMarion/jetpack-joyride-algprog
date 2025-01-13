@@ -40,7 +40,7 @@ int main() {
     int isLevelLoaded = 0;
     float currentSpeed;
     int isSlowMotionActive = 0;
-    float slowMotionUntil = 0;
+    int slowMotionUntil = 0;
 
     MapSection loadedMap[2] = {0};
     Lasers lasers = {0};
@@ -64,11 +64,11 @@ int main() {
                 loadMapRandomly(loadedMap[1], level.mapSections);
             }
 
-            if(player.lives <= 0 || IsKeyPressed(KEY_ESCAPE)) {
+            if(player.lives <= 0) {
                 currentScreen = GAMEOVER;
             }
 
-            checkCheatWords(&player, "GHOST", "SLOW", &slowMotionUntil, &isSlowMotionActive);
+            checkCheatWords(&player, &slowMotionUntil, &isSlowMotionActive);
 
             if (isSlowMotionActive) {
                 currentSpeed = level.speed * 0.5f;
@@ -104,7 +104,8 @@ int main() {
                 movePlayer(&player, player.jumpPower);
             }
 
-            checksCollision(&player, loadedMap[0], lasers, &sounds);
+            checkMapCollision(&player, loadedMap[0], sounds);
+            checkLasersColision(&player, lasers, sounds.hit);
 
             if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {
                 currentLevel++;
@@ -126,13 +127,16 @@ int main() {
                 break;
 
             case GAMEPLAY:
-                if (isLevelLoaded) {
-                    DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
-                    DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
-                    drawMap(loadedMap, &level.mapTextures);
-                    drawLasers(lasers, &laserTexture, sounds.laser);
-                    drawPlayer(&player);
+                if (!isLevelLoaded) {
+                    break;
                 }
+
+                DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
+                DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
+                drawMap(loadedMap, &level.mapTextures);
+                drawPlayer(&player);
+                drawLasers(lasers, &laserTexture, sounds.laser);
+                DrawFPS(0, 0);
 
                 break;
 
@@ -145,7 +149,7 @@ int main() {
                 break;
 
             case SAVEGAME:
-                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, &allSaveSize);
+                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, allSaveSize);
                 break;
 
             case ERROR:
@@ -153,7 +157,7 @@ int main() {
                 break;
 
             case HIGHSCORES:
-                drawHighScoresScreen(allSaves, &allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
+                drawHighScoresScreen(allSaves, allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
 
             default: break;
         }

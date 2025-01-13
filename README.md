@@ -19,7 +19,9 @@ Trabalho final desenvolvido para a disciplina de Algoritmos e Programação na U
 - [x] Cheats (invulnerabilidade, camera lenta...)
 - [x] Correção da quantidade de vidas
 - [x] Pause (correção da tecla ESC)
-- [ ] Adicionar movimento das setinhas nos menus
+- [x] Adicionar movimento das setinhas nos menus
 - [x] Progresso de Nível
 - [x] Salvar e carregar pontuações
-
+- [ ] Relatório
+- [ ] Coletável
+- [ ] Trocar para .h's
