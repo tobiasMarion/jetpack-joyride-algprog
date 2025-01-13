@@ -5,7 +5,7 @@
 
 
 
-typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR, HIGHSCORES} GameScreen;
+typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR, HIGHSCORES, PAUSE} GameScreen;
 
 int amountOfOptionsOnScreen = 0;
 int currentSelectedOption = -1;
@@ -281,3 +281,21 @@ void drawHighScoresScreen(Save *allSaves, int allSavesSize, char *globalMessage,
     }
 }
 
+void drawPauseScreen(Sound *soundButton, GameScreen *currentScreen) {
+    ClearBackground(WHITE);
+    navigateWithArrowKeys(2);
+    int buttonX = BUTTON_POSITION_X_CENTER;
+
+    DrawText("Pause", ( SCREEN_WIDTH - MeasureText("Pause", 120) )/2 , 80, 120, BLACK);
+
+    if( createButton("Continue", buttonX, 350, KEY_C, isOptionSelected(0), DARKGREEN, GREEN, soundButton)) {
+        *currentScreen = GAMEPLAY;
+
+    }
+
+    if( createButton("Back to menu", buttonX, 475, KEY_M, isOptionSelected(1), RED, BLACK, soundButton)) {
+        *currentScreen = HOME;
+
+    }
+
+}

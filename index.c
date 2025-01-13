@@ -68,6 +68,10 @@ int main() {
                 currentScreen = GAMEOVER;
             }
 
+            if(IsKeyPressed(KEY_P)) {
+                currentScreen = PAUSE;
+            }
+
             checkCheatWords(&player, &slowMotionUntil, &isSlowMotionActive);
 
             if (isSlowMotionActive) {
@@ -158,6 +162,10 @@ int main() {
 
             case HIGHSCORES:
                 drawHighScoresScreen(allSaves, allSaveSize, saveMessage, &sounds.button, &isGameRunning, &currentScreen);
+                break;
+
+            case PAUSE:
+                drawPauseScreen(&sounds.button, &currentScreen);
 
             default: break;
         }
