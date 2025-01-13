@@ -106,32 +106,32 @@ int saveSavesFile(Save *vectorSaves, int vectorSize) {
 }
 
 
-int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int *allSaveVectorSize) {
+int saveGame(Save *currentSave, char *globalMessage, Save *allsaves, int allSaveVectorSize) {
     if (!verifyName(currentSave)) {
         return 0;
     }
 
     giveDate(currentSave);
 
-    if(*allSaveVectorSize < MAX_SAVES) {
-        allsaves[*allSaveVectorSize] = *currentSave;
-        (*allSaveVectorSize)++;
+    if(allSaveVectorSize < MAX_SAVES) {
+        allsaves[allSaveVectorSize] = *currentSave;
+        allSaveVectorSize++;
         strcpy(globalMessage, "Score saved!!");
-        sortSaves(allsaves, *allSaveVectorSize);
+        sortSaves(allsaves, allSaveVectorSize);
 
         return 1;
     }
 
 
-    if (allsaves[*allSaveVectorSize - 1].points > currentSave->points) {
+    if (allsaves[allSaveVectorSize - 1].points > currentSave->points) {
         strcpy(globalMessage, "New score is not high enough to be saved, Git Gud!");
 
         return 0;
     }
 
-    allsaves[*allSaveVectorSize - 1] = *currentSave;
+    allsaves[allSaveVectorSize - 1] = *currentSave;
     strcpy(globalMessage, "Score saved!!");
-    sortSaves(allsaves, *allSaveVectorSize);
+    sortSaves(allsaves, allSaveVectorSize);
 
     return 1;
 }

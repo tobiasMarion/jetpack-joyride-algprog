@@ -40,7 +40,7 @@ int main() {
     int isLevelLoaded = 0;
     float currentSpeed;
     int isSlowMotionActive = 0;
-    float slowMotionUntil = 0;
+    int slowMotionUntil = 0;
 
     MapSection loadedMap[2] = {0};
     Lasers lasers = {0};
@@ -68,7 +68,7 @@ int main() {
                 currentScreen = GAMEOVER;
             }
 
-            checkCheatWords(&player, "GHOST", "SLOW", &slowMotionUntil, &isSlowMotionActive);
+            checkCheatWords(&player, &slowMotionUntil, &isSlowMotionActive);
 
             if (isSlowMotionActive) {
                 currentSpeed = level.speed * 0.5f;
@@ -145,7 +145,7 @@ int main() {
                 break;
 
             case SAVEGAME:
-                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, &allSaveSize);
+                drawSaveGameScreen(&currentScreen, &currentSave, &sounds.button, &player, saveMessage, allSaves, allSaveSize);
                 break;
 
             case ERROR:

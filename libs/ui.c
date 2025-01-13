@@ -180,7 +180,7 @@ void drawGameOverScreen(
 
 
 void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClickSound, Player *player,
-                        char *globalMessage, Save *allSaves, int *allSaveVectorSize) {
+                        char *globalMessage, Save *allSaves, int allSaveVectorSize) {
     score(save, player);
     navigateWithArrowKeys(2);
     DrawText("Save Game menu", (SCREEN_WIDTH - MeasureText("Save Game Menu", 80)) / 2, 80, 80, BLACK );
@@ -196,7 +196,7 @@ void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClic
     createInputText(save->name, BUTTON_POSITION_X_CENTER, 425, WHITE, GRAY, BLACK);
 
 
-    if (createButton("Save Progress", saveButtonX, buttonsY, KEY_S, isOptionSelected(0), GREEN, BLACK, buttonClickSound)) {
+    if (createButton("Save Progress", saveButtonX, buttonsY, -1, isOptionSelected(0), GREEN, BLACK, buttonClickSound)) {
         if(verifyName(save)) {
             globalMessage[0] = '\0';
             saveGame(save, globalMessage, allSaves, allSaveVectorSize);
@@ -208,7 +208,7 @@ void drawSaveGameScreen(GameScreen *currentScreen, Save *save, Sound *buttonClic
 
     DrawText(globalMessage, (SCREEN_WIDTH - MeasureText(globalMessage,50)) / 2, 700,50,RED);
 
-    if (createButton("Return", returnButtonX, buttonsY, KEY_R, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
+    if (createButton("Return", returnButtonX, buttonsY, -1, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
         *currentScreen = GAMEOVER;
     }
 }
