@@ -106,7 +106,7 @@ int main() {
                 movePlayer(&player, level.gravity);
             }
 
-            if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE)) {
+            if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_SPACE) || IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
                 player.isTouchingTheGround = 0;
                 movePlayer(&player, player.jumpPower);
             }
