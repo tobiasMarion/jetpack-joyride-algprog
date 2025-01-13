@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "raylib.h"
 #include "./libs/constants.h"
+#include "./libs/utils.c"
 #include "./libs/map.c"
 #include "./libs/player.c"
 #include "./libs/leaderboard.c"
@@ -58,6 +59,7 @@ int main() {
 
                 if (!isLevelLoaded) {
                     currentScreen = ERROR;
+                    continue;
                 }
 
                 loadEmptyMap(loadedMap[0]);
@@ -66,16 +68,17 @@ int main() {
 
             if(player.lives <= 0) {
                 currentScreen = GAMEOVER;
+                removeAllLasers(lasers);
             }
 
-            if(IsKeyPressed(KEY_P)) {
+            if(IsKeyPressed(KEY_ESCAPE)) {
                 currentScreen = PAUSE;
             }
 
             checkCheatWords(&player, &slowMotionUntil, &isSlowMotionActive);
 
             if (isSlowMotionActive) {
-                currentSpeed = level.speed * 0.5f;
+                currentSpeed = level.speed * 0.5;
             } else {
                 currentSpeed = level.speed;
             }
@@ -141,7 +144,6 @@ int main() {
                 drawPlayer(&player);
                 drawLasers(lasers, &laserTexture, sounds.laser);
                 DrawFPS(0, 0);
-
                 break;
 
             case NEXT_LEVEL:

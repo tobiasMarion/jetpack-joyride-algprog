@@ -1,8 +1,6 @@
 #include "raylib.h"
 #include "string.h"
 #include "constants.h"
-//#include "leaderboard.c"
-
 
 
 typedef enum GameScreen { HOME, GAMEPLAY, NEXT_LEVEL, GAMEOVER, ENDGAME, SAVEGAME, ERROR, HIGHSCORES, PAUSE} GameScreen;
@@ -33,7 +31,6 @@ int createButton(char label[], int x, int y, int shortcut, int isSelected, Color
 
     int labelX = x + (BUTTON_WIDTH - MeasureText(label, BUTTON_LABEL_SIZE)) / 2;
     int labelY = y + (BUTTON_HEIGHT - BUTTON_LABEL_SIZE) / 2;
-
 
     DrawRectangleRec(button, color);
     DrawText(label, labelX, labelY, BUTTON_LABEL_SIZE, isHovering || isSelected ? hoverColor : WHITE);
@@ -124,7 +121,7 @@ void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *playe
 
     DrawText("Jetpack Joyride",  (SCREEN_WIDTH - MeasureText("Jetpack Joyride", 100)) / 2 , 80, 100, RED);
 
-    if (createButton("Play", buttonX, 225, KEY_R, isOptionSelected(0), BLACK, RED, buttonClickSound)) {
+    if (createButton("Play", buttonX, 225, KEY_N, isOptionSelected(0), BLACK, RED, buttonClickSound)) {
         initializePlayer(player, 6, "resources/player.png");
         initializeSave(currentSave);
         *currentLevel = 1;
@@ -133,11 +130,11 @@ void drawHomeScreen(int *isGameRunning, GameScreen *currentScreen, Player *playe
 
     }
 
-    if (createButton("Highscores", buttonX, 350, KEY_S, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
+    if (createButton("Leaderboard", buttonX, 350, KEY_L, isOptionSelected(1), BLACK, RED, buttonClickSound)) {
         *currentScreen = HIGHSCORES;
     }
 
-    if (createButton("Exit Game", buttonX, 475, KEY_E, isOptionSelected(2), BLACK, RED, buttonClickSound)) {
+    if (createButton("Exit Game", buttonX, 475, KEY_Q, isOptionSelected(2), BLACK, RED, buttonClickSound)) {
         *isGameRunning = 0;
     }
 }
@@ -173,7 +170,7 @@ void drawGameOverScreen(
         *currentScreen = HOME;
     }
 
-    if (createButton("Exit Game", buttonX, 600, KEY_E, isOptionSelected(3), BLACK, RED, buttonClickSound)) {
+    if (createButton("Exit Game", buttonX, 600, KEY_Q, isOptionSelected(3), BLACK, RED, buttonClickSound)) {
         *isGameRunning = 0;
     }
 }
@@ -233,6 +230,8 @@ void drawNextLevelScreen(int n, double upLevelAt, GameScreen *currentScreen) {
 
 void drawErrorScreen(int *isGameRunning, char errorMessage[ERROR_MESSAGE_LENGTH]) {
     ClearBackground(RED);
+    int buttonX = BUTTON_POSITION_X_CENTER;
+    navigateWithArrowKeys(1);
 
     DrawText("ERROR",
         (SCREEN_WIDTH - MeasureText("ERROR", 100)) / 2,
@@ -243,6 +242,10 @@ void drawErrorScreen(int *isGameRunning, char errorMessage[ERROR_MESSAGE_LENGTH]
         (SCREEN_WIDTH - MeasureText(errorMessage, 60)) / 2,
         256, 60, WHITE
     );
+
+    if (createButton("Exit", buttonX, 500, KEY_Q, isOptionSelected(0), RED, WHITE, NULL)) {
+        *isGameRunning = 0;
+    }
 }
 
 void drawSave(Save *allSaves, int size) {
@@ -271,11 +274,11 @@ void drawHighScoresScreen(Save *allSaves, int allSavesSize, char *globalMessage,
     DrawText("DATE:",1400, 160, 40, GOLD);
     drawSave(allSaves, allSavesSize);
 
-    if(createButton("Exit", 1400, 650, KEY_E, isOptionSelected(0), RED, DARKPURPLE, buttonClickSound)) {
+    if(createButton("Exit", 1400, 650, KEY_Q, isOptionSelected(0), RED, DARKPURPLE, buttonClickSound)) {
         *isGameRunning = 0;
     }
 
-    if(createButton("Back to menu", 880, 650, KEY_B, isOptionSelected(1), DARKGREEN, GREEN, buttonClickSound)) {
+    if(createButton("Back to menu", 880, 650, KEY_M, isOptionSelected(1), DARKGREEN, GREEN, buttonClickSound)) {
         globalMessage[0] = '\0';
         *currentScreen = HOME;
     }
