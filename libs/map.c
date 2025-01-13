@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "utils.c"
 #include "raylib.h"
 
 typedef char MapSection[MAP_HEIGHT][SECTION_WIDTH];
@@ -223,7 +222,7 @@ int loadLevel(int levelNumber, Level *level, char errorMessage[ERROR_MESSAGE_LEN
 
     level->speed = 0.2 + (levelNumber - 1) * LEVEL_SPEED_MULTIPLIER;
     level->gravity = INITIAL_GRAVITY + (levelNumber - 1) * 0.05;
-    level->chanceLaserSpawn = (levelNumber /* - 1*/) * 0.30;
+    level->chanceLaserSpawn = (levelNumber - 1) * 0.30;
 
     printf("Level %d loaded successfully \n", levelNumber);
 
@@ -252,7 +251,7 @@ void spawnLasers(Lasers lasers, Level *currentLevel) {
     }
 
     int currentTime = GetTime();
-    int row = getRandIntBetween(0 + 1, MAP_HEIGHT - 2);
+    int row = getRandIntBetween(1, MAP_HEIGHT - 2);
     lasers[row] = currentTime;
 }
 

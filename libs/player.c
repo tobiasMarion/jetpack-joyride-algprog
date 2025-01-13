@@ -39,11 +39,26 @@ void initializePlayer(Player *player, float startYPosition, char textureName[]) 
     player->inputBuffer[0] = '\0';
 }
 
+void keepPlayerOnMap(Player *player) {
+    int minY = CELL_SIZE;
+    int maxY = CELL_SIZE * (MAP_HEIGHT - 2);
+
+    if (player->positionY < minY) {
+        player->positionY = minY;
+        player->speedY = 0;
+    } else if (player->positionY > maxY) {
+            player->positionY = maxY;
+            player->speedY = 0;
+    }
+}
+
 void movePlayer(Player *player, float speedToAdd) {
     player->speedY += speedToAdd;
     player->speedY = minMax(player->speedY, MIN_Y_SPEED, MAX_Y_SPEED);
 
     player->positionY += player->speedY;
+
+    keepPlayerOnMap(player);
 }
 
 void drawPlayer(Player *player) {
@@ -71,6 +86,7 @@ void collectCoin(Player *player, Sound coinSound) {
 }
 
 void checkMapCollision(Player *player, MapSection map, Sounds sounds) {
+    float initialPosition = player->positionY;
     player->isTouchingTheGround = 0;
     Rectangle playerHitbox = { INITIAL_X_POSITION * CELL_SIZE,
                                player->positionY,
@@ -95,7 +111,7 @@ void checkMapCollision(Player *player, MapSection map, Sounds sounds) {
                             if (player->speedY < 0) {
                                 player->positionY = (row + 1) * CELL_SIZE;
                                 player->speedY = 0;
-                            } else if (player->speedY >= 0) {
+                            } else if (player->speedY > 0) {
                                 player->positionY = (row - 1) * CELL_SIZE;
                                 player->speedY = 0;
                                 player->isTouchingTheGround = 1;
@@ -113,6 +129,7 @@ void checkMapCollision(Player *player, MapSection map, Sounds sounds) {
                         if (!player->isInvulnerable) {
                             applyDamageToPlayer(player, sounds.hit);
                         }
+                        break;
                 }
             }
         }
