@@ -22,6 +22,6 @@ Trabalho final desenvolvido para a disciplina de Algoritmos e Programação na U
 - [x] Adicionar movimento das setinhas nos menus
 - [x] Progresso de Nível
 - [x] Salvar e carregar pontuações
-- [ ] Relatório
+- [x] Relatório
 - [ ] Coletável
 - [ ] Trocar para .h's
