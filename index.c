@@ -104,7 +104,8 @@ int main() {
                 movePlayer(&player, player.jumpPower);
             }
 
-            checksCollision(&player, loadedMap[0], lasers, &sounds);
+            checkMapCollision(&player, loadedMap[0], sounds);
+            checkLasersColision(&player, lasers, sounds.hit);
 
             if (player.distance > level.requiredDistanceToNextLevel && isLevelLoaded) {
                 currentLevel++;
@@ -126,13 +127,16 @@ int main() {
                 break;
 
             case GAMEPLAY:
-                if (isLevelLoaded) {
-                    DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
-                    DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
-                    drawMap(loadedMap, &level.mapTextures);
-                    drawPlayer(&player);
-                    drawLasers(lasers, &laserTexture, sounds.laser);
+                if (!isLevelLoaded) {
+                    break;
                 }
+
+                DrawText(TextFormat("DISTANCE: %d", player.distance), 20, 110, 35, RED);
+                DrawText(TextFormat("COINS: %d", player.coins), 20, 80, 35, GOLD);
+                drawMap(loadedMap, &level.mapTextures);
+                drawPlayer(&player);
+                drawLasers(lasers, &laserTexture, sounds.laser);
+                DrawFPS(0, 0);
 
                 break;
 

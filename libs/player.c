@@ -58,96 +58,88 @@ void drawPlayer(Player *player) {
     DrawTexturePro(player->texture, sourceRect, destRect, (Vector2){0, 0}, 0.0f, color);
 }
 
-int checksCollision(Player *player, MapSection map, Lasers lasers, Sounds *sounds) {
-    int y = (int)(player->positionY / CELL_SIZE);
-    int x = round(INITIAL_X_POSITION + offsetX);
-    float decimalPartY = player->positionY - y;
+void applyDamageToPlayer(Player *player, Sound hitSound) {
+    player->lives -= 1;
+    player->isInvulnerable = 1;
+    player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
+    PlaySound(hitSound);
+}
 
+void collectCoin(Player *player, Sound coinSound) {
+    player->coins += 1;
+    PlaySound(coinSound);
+}
 
-    if (player->speedY < 0 && map[y][x] == 'X') {
-        player->speedY = 0;
-        player->positionY = (y + 1) * CELL_SIZE;
-        y++;
+void checkMapCollision(Player *player, MapSection map, Sounds sounds) {
+    player->isTouchingTheGround = 0;
+    Rectangle playerHitbox = { INITIAL_X_POSITION * CELL_SIZE,
+                               player->positionY,
+                               CELL_SIZE,
+                               CELL_SIZE };
+
+    // Checks all cells from the current and next column on map
+    // It is necessary to check the next one because offsetX
+    for (int col = player->gridX; col < player->gridX + 2; col++) {
+        for (int row = 0; row < MAP_HEIGHT; row++) {
+            Rectangle cell = {col * CELL_SIZE - offsetX, row * CELL_SIZE, CELL_SIZE, CELL_SIZE};
+
+            if (CheckCollisionRecs(playerHitbox, cell)) {
+                switch (map[row][col]) {
+                    case 'C':
+                        collectCoin(player, sounds.coin);
+                        map[row][col] = ' ';
+                        break;
+
+                    case 'X':
+                        if (col == player->gridX) {
+                            if (player->speedY < 0) {
+                                player->positionY = (row + 1) * CELL_SIZE;
+                                player->speedY = 0;
+                            } else if (player->speedY >= 0) {
+                                player->positionY = (row - 1) * CELL_SIZE;
+                                player->speedY = 0;
+                                player->isTouchingTheGround = 1;
+                            }
+                        } else {
+                            Rectangle overlap = GetCollisionRec(playerHitbox, cell);
+                            int area = overlap.width * overlap.height;
+                            if (area > CELL_SIZE / 4) {
+                                applyDamageToPlayer(player, sounds.hit);
+                            }
+                        }
+                        break;
+
+                    case 'Z':
+                        if (!player->isInvulnerable) {
+                            applyDamageToPlayer(player, sounds.hit);
+                        }
+                }
+            }
+        }
     }
+}
 
-    if (player->speedY > 0 && map[y+1][x] == 'X') {
-        player->speedY = 0;
-        player->positionY = y * CELL_SIZE;
-        y--;
-        player->isTouchingTheGround = 1;
-    }
-
-    if (map[y][x] == 'C') {
-        player->coins += 1;
-        map[y][x] = ' ';
-        PlaySound(sounds->coin);
-    }
-
-    if (map[y+1][x] == 'C') {
-        player->coins += 1;
-        map[y+1][x] = ' ';
-        PlaySound(sounds->coin);
-    }
-
-    if (player->isInvulnerable) {
-        return 0;
-    }
-
-    if (map[y][x] == 'Z') {
-        player->lives -= 1;
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-        PlaySound(sounds->hit);
-
-        return 1;
-    }
-
-    if (map[y][x] == 'Z') {
-        player->lives -= 1;
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-        PlaySound(sounds->hit);
-
-        return 1;
-    }
-
-    if (decimalPartY > 0.7 && map[y+1][x] == 'Z') {
-        player->lives -= 1;
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-        PlaySound(sounds->hit);
-
-        return 1;
-    }
-
-
-    if (map[y][x+1] == 'X') {
-        player->lives -= 1;
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-        PlaySound(sounds->hit);
-
-        return 1;
-    }
-
+void checkLasersColision(Player *player, Lasers lasers, Sound hitSound) {
     int currentTime = GetTime();
-    int dt = currentTime - LASER_ACTIVATION_DELAY;
-    int isTouchingLaser = (lasers[y] < dt && lasers[y] != 0) || (decimalPartY > 0.7 && lasers[y+1] < dt && lasers[y+1] != 0);
 
-    if (isTouchingLaser) {
-        player->lives -= 1;
-        player->isInvulnerable = 1;
-        player->invulnerableUntill = GetTime() + INVULNERABLE_AFTER_HIT_DURATION;
-        PlaySound(sounds->hit);
+    Rectangle playerHitbox = { INITIAL_X_POSITION * CELL_SIZE,
+                               player->positionY,
+                               CELL_SIZE,
+                               CELL_SIZE };
+
+
+    for (int i = 1; i < MAP_HEIGHT - 1; i++) {
+        if (lasers[i] != 0 && currentTime > lasers[i] + LASER_ACTIVATION_DELAY) {
+            Rectangle laser = { 0, i * CELL_SIZE, SCREEN_WIDTH, CELL_SIZE };
+            if (CheckCollisionRecs(playerHitbox, laser)) {
+                applyDamageToPlayer(player, hitSound);
+            }
+        }
     }
-
-    return 0;
 }
 
 void addCharToBuffer(char charToAdd, char buffer[MAX_INPUT_CHARS + 1]) {
     int length = strlen(buffer);
-
-    printf("%d\n", length);
 
     if (length < MAX_INPUT_CHARS) {
         buffer[length] = charToAdd;
@@ -172,8 +164,6 @@ int verifyWordOnBuffer(char *wordToCheck, char *buffer) {
 
     char *initialPointerToCheck = buffer + bufferLength - wordLenght;
 
-    printf("%s %s", wordToCheck, initialPointerToCheck);
-
     return strcmp(initialPointerToCheck, wordToCheck) == 0;
 
 }
@@ -182,15 +172,16 @@ void checkCheatWords(Player *player, int *slowMotionUntil, int *isSlowMotionActi
     for (int key = 'A'; key <= 'Z'; key++) {
         if (IsKeyPressed(key)) {
             addCharToBuffer(key, player->inputBuffer);
-            printf("%s\n", player->inputBuffer);
 
             if (verifyWordOnBuffer(INVULNERABLE_CHEAT_CODE, player->inputBuffer)) {
+                printf("CHEAT ACTIVATED: Player Invulnerable\n");
                 player->isInvulnerable = 1;
                 player->invulnerableUntill = GetTime() + 5;
                 player->inputBuffer[0] = '\0';
             }
 
             if (verifyWordOnBuffer(SLOW_CHEAT_CODE, player->inputBuffer)) {
+                printf("CHEAT ACTIVATED: Slow Map\n");
                 *isSlowMotionActive = 1;
                 *slowMotionUntil = GetTime() + 5;
                 player->inputBuffer[0] = '\0';
